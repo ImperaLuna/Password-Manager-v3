@@ -4,7 +4,7 @@ import customtkinter as ctk
 ctk.set_appearance_mode('system')
 ctk.set_default_color_theme('orange')
 
-
+#todo Bug: Program will not run if the db with account from storage storage is empty
 
 class MainApp(ctk.CTk):
     def __init__(self): 
@@ -12,6 +12,7 @@ class MainApp(ctk.CTk):
 
         from login import Login
         from register import Register
+        from storage import Storage
 
         self.title('Password Manager')
         self.geometry('960x540')
@@ -20,12 +21,12 @@ class MainApp(ctk.CTk):
         container = ctk.CTkFrame(self) 
         container.pack(side = "top", fill = "both", expand = True) 
 
-        container.grid_rowconfigure(0, weight = 1)
-        container.grid_columnconfigure(0, weight = 1)
+        container.grid_rowconfigure(1, weight = 1)
+        container.grid_columnconfigure(0, weight=1)
 
 
         self.frames = {} 
-        for WINDOW in (Login, Register):
+        for WINDOW in (Login, Register, Storage):
 
             frame = WINDOW(container, self)
             self.frames[WINDOW] = frame 
