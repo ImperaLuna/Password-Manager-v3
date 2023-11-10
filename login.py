@@ -8,7 +8,11 @@ class Login(ctk.CTkFrame):
     def __init__(self, parent, controller): 
         ctk.CTkFrame.__init__(self, parent)
         from register import Register
+        from storage import Storage
 
+        #! Bug: Program will not run if the db with account from storage storage is empty
+        #todo : Create a class for sidebar_frame
+        
         self.sidebar_frame = ctk.CTkFrame(self, width=140, height=560, corner_radius=0)
         self.sidebar_frame.grid(row=1, column=0, rowspan=4, sticky='ns')  
         self.sidebar_frame.grid_rowconfigure(4, weight=1)
@@ -60,8 +64,8 @@ class Login(ctk.CTkFrame):
 
 
         #! skip login button
-        button_skip = ctk.CTkButton(master= self.login_frame, text='Skip Login',)
-                                    # command=self.master.switch_to_storage_window)
+        button_skip = ctk.CTkButton(master= self.login_frame, text='Skip Login',
+                                    command = lambda : controller.show_frame(Storage))
         button_skip.grid (row=7, column=0, padx=12, sticky='ew')
     
 
