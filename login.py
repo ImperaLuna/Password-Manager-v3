@@ -10,6 +10,9 @@ class Login(ctk.CTkFrame):
         from register import Register
         from storage import Storage
 
+        #! Bug: Program will not run if the db with account from storage storage is empty
+        #todo : Create a class for sidebar_frame
+        
         self.sidebar_frame = ctk.CTkFrame(self, width=140, height=560, corner_radius=0)
         self.sidebar_frame.grid(row=1, column=0, rowspan=4, sticky='ns')  
         self.sidebar_frame.grid_rowconfigure(4, weight=1)

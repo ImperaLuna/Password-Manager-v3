@@ -4,7 +4,7 @@ import customtkinter as ctk
 ctk.set_appearance_mode('system')
 ctk.set_default_color_theme('orange')
 
-#todo Bug: Program will not run if the db with account from storage storage is empty
+#! Bug: Program will not run if the db with account from storage storage is empty
 
 class MainApp(ctk.CTk):
     def __init__(self): 
