@@ -21,8 +21,8 @@ class MainApp(ctk.CTk):
         container = ctk.CTkFrame(self) 
         container.pack(side = "top", fill = "both", expand = True) 
 
-        container.grid_rowconfigure(1, weight = 1)
-        container.grid_columnconfigure(0, weight=1)
+        # container.grid_rowconfigure(1, weight = 1)
+        # container.grid_columnconfigure(0, weight=1)
 
 
         self.frames = {} 
