@@ -1,5 +1,6 @@
 import customtkinter as ctk
 from login import Login
+from sidebar import SideBarFrame
 import os
 import sqlite3
 import bcrypt
@@ -7,28 +8,22 @@ import bcrypt
 class Register(ctk.CTkFrame): 
     def __init__(self, parent, controller):
         ctk.CTkFrame.__init__(self, parent)
-		
-        self.sidebar_frame = ctk.CTkFrame(self, width=140, height=560, corner_radius=0)
-        self.sidebar_frame.grid(row=1, column=0, rowspan=4, sticky='ns')  
-        self.sidebar_frame.grid_rowconfigure(4, weight=1)
 
-        self.sidebar_frame = ctk.CTkFrame(self, width=140, height=560, corner_radius=0)
-        self.sidebar_frame.grid(row=1, column=0, rowspan=4, sticky='ns')  
-        self.sidebar_frame.grid_rowconfigure(4, weight=1)
+        sidebar = SideBarFrame(self, controller)
+        sidebar.grid(row=0, column=0, rowspan=4, sticky='ns')
+
         
-
-
-        self.logo_label = ctk.CTkLabel(self.sidebar_frame, text='Register Form', font=ctk.CTkFont(size=20, weight='bold'))
+        self.logo_label = ctk.CTkLabel(sidebar.frame, text='Register Form', font=ctk.CTkFont(size=20, weight='bold'))
         self.logo_label.grid(row=1, column=0, padx=20, pady=(20, 10))
 
-        self.back_to_login = ctk.CTkButton(self.sidebar_frame,text='Back To Login', 
+        self.back_to_login = ctk.CTkButton(sidebar.frame,text='Back To Login', 
                                            command = lambda : controller.show_frame(Login))
         self.back_to_login.grid(row=2, column=0, padx=20, pady=10)
 
-        self.appearance_mode_label = ctk.CTkLabel(self.sidebar_frame, text='Appearance Mode:', anchor='sw')
+        self.appearance_mode_label = ctk.CTkLabel(sidebar.frame, text='Appearance Mode:', anchor='sw')
         self.appearance_mode_label.grid(row=4, column=0, padx=20, pady=(20, 10), sticky='sw')  
 
-        self.appearance_mode_optionemenu = ctk.CTkOptionMenu(self.sidebar_frame, values=['System','Light', 'Dark'], 
+        self.appearance_mode_optionemenu = ctk.CTkOptionMenu(sidebar.frame, values=['System','Light', 'Dark'], 
                                                              command=self.change_appearance_mode_event)
         self.appearance_mode_optionemenu.grid(row=5, column=0, padx=20, pady=(0, 40), sticky='sw')  
                 

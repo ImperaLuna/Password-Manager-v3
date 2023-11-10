@@ -1,4 +1,5 @@
 import customtkinter as ctk
+from sidebar import SideBarFrame
 import sqlite3
 import pyperclip  
 import webbrowser  
@@ -9,32 +10,26 @@ class Storage(ctk.CTkFrame):
         
         from login import Login
 
-        self.sidebar_frame = ctk.CTkFrame(self, width=140, height=540, corner_radius=0)
-        self.sidebar_frame.grid(row=0, column=0, rowspan=5, sticky='ns')  
-        self.sidebar_frame.grid_rowconfigure(4, weight=1)
+        sidebar = SideBarFrame(self, controller)
+        sidebar.grid(row=0, column=0, rowspan=4, sticky='ns')
 
-        self.sidebar_frame = ctk.CTkFrame(self, width=140, height=540, corner_radius=0)
-        self.sidebar_frame.grid(row=0, column=0, rowspan=5, sticky='ns')  
-        self.sidebar_frame.grid_rowconfigure(4, weight=1)
-
-
-        self.logo_label = ctk.CTkLabel(self.sidebar_frame, text='Storage Module', font=ctk.CTkFont(size=20, weight='bold'))
+        self.logo_label = ctk.CTkLabel(sidebar.frame, text='Storage Module', font=ctk.CTkFont(size=20, weight='bold'))
         self.logo_label.grid(row=0, column=0, padx=20, pady=(20, 10))
 
-        self.new_item = ctk.CTkButton(self.sidebar_frame, text='New Entry')
+        self.new_item = ctk.CTkButton(sidebar.frame, text='New Entry')
         self.new_item.grid(row=1, column=0, padx=20, pady=10)
 
-        self.pw_gegenerator = ctk.CTkButton(self.sidebar_frame, text='Pass Generator')
-        self.pw_gegenerator.grid(row=2, column=0, padx=20, pady=10)
+        self.pw_generator = ctk.CTkButton(sidebar.frame, text='Pass Generator')
+        self.pw_generator.grid(row=2, column=0, padx=20, pady=10)
 
         # Move the Log Out button to the bottom by changing the row index
-        self.log_out = ctk.CTkButton(self.sidebar_frame, text='Log Out', command=lambda: controller.show_frame(Login))
+        self.log_out = ctk.CTkButton(sidebar.frame, text='Log Out', command=lambda: controller.show_frame(Login))
         self.log_out.grid(row=5, column=0, padx=20, pady=10)  # Change the row index to 5
 
-        self.appearance_mode_label = ctk.CTkLabel(self.sidebar_frame, text='Appearance Mode:', anchor='sw')
+        self.appearance_mode_label = ctk.CTkLabel(sidebar.frame, text='Appearance Mode:', anchor='sw')
         self.appearance_mode_label.grid(row=6, column=0, padx=40, pady=(0, 10), sticky='sw')
 
-        self.appearance_mode_optionemenu = ctk.CTkOptionMenu(self.sidebar_frame, values=['System', 'Light', 'Dark'],
+        self.appearance_mode_optionemenu = ctk.CTkOptionMenu(sidebar.frame, values=['System', 'Light', 'Dark'],
                                                              command=self.change_appearance_mode_event)
         self.appearance_mode_optionemenu.grid(row=7, column=0, padx=20, pady=(0, 20), sticky='sw')
 
