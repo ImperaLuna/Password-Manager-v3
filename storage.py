@@ -12,29 +12,23 @@ class Storage(ctk.CTkFrame):
 
         sidebar = SideBarFrame(self, controller)
         sidebar.grid(row=0, column=0, rowspan=4, sticky='ns')
+        sidebar.label('Storage Module')
 
-        self.logo_label = ctk.CTkLabel(sidebar.frame, text='Storage Module', font=ctk.CTkFont(size=20, weight='bold'))
-        self.logo_label.grid(row=0, column=0, padx=20, pady=(20, 10))
+
 
         self.new_item = ctk.CTkButton(sidebar.frame, text='New Entry')
-        self.new_item.grid(row=1, column=0, padx=20, pady=10)
+        self.new_item.grid(row=2, column=0, padx=20, pady=10)
 
         self.pw_generator = ctk.CTkButton(sidebar.frame, text='Pass Generator')
-        self.pw_generator.grid(row=2, column=0, padx=20, pady=10)
+        self.pw_generator.grid(row=3, column=0, padx=20, pady=10)
 
         # Move the Log Out button to the bottom by changing the row index
         self.log_out = ctk.CTkButton(sidebar.frame, text='Log Out', command=lambda: controller.show_frame(Login))
         self.log_out.grid(row=5, column=0, padx=20, pady=10)  # Change the row index to 5
 
-        self.appearance_mode_label = ctk.CTkLabel(sidebar.frame, text='Appearance Mode:', anchor='sw')
-        self.appearance_mode_label.grid(row=6, column=0, padx=40, pady=(0, 10), sticky='sw')
-
-        self.appearance_mode_optionemenu = ctk.CTkOptionMenu(sidebar.frame, values=['System', 'Light', 'Dark'],
-                                                             command=self.change_appearance_mode_event)
-        self.appearance_mode_optionemenu.grid(row=7, column=0, padx=20, pady=(0, 20), sticky='sw')
 
         self.scrollable_frame = ctk.CTkScrollableFrame(self, label_text="Accounts")
-        self.scrollable_frame.grid(row=0, column=1, padx=(40, 0), pady=(20, 0), sticky="ns")
+        self.scrollable_frame.grid(row=0, column=1, padx=(60, 0), pady=(20, 0), sticky="ns")
         self.scrollable_frame.grid_columnconfigure(0, weight=1)
 
         self.details_frame = ctk.CTkFrame(self, width=400, height=500)  # Frame for displaying specific content
@@ -63,8 +57,6 @@ class Storage(ctk.CTkFrame):
             button = ctk.CTkButton(master=self.scrollable_frame, text=account_name[0], command=lambda i=i: self.show_details(i))
             button.grid(row=i, column=0, padx=10, pady=(0, 20))
 
-    def change_appearance_mode_event(self, new_appearance_mode: str):
-        ctk.set_appearance_mode(new_appearance_mode)
 
     def show_details(self, account_index):
         # Create entry fields and buttons dynamically

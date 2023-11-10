@@ -15,17 +15,9 @@ class Login(ctk.CTkFrame):
         # Create an instance of SideBarFrame
         sidebar = SideBarFrame(self, controller)
         sidebar.grid(row=0, column=0, rowspan=4, sticky='ns')
+        sidebar.label('Login')
 
-        # Configure sidebar_frame appearance
-        self.appearance_mode_label = ctk.CTkLabel(sidebar.frame, text='Appearance Mode:', anchor='sw')
-        self.appearance_mode_label.grid(row=4, column=0, padx=20, pady=(20, 10), sticky='sw')  
 
-        self.appearance_mode_optionemenu = ctk.CTkOptionMenu(sidebar.frame, values=['System', 'Light', 'Dark'], 
-                                                             command=self.change_appearance_mode_event)
-        self.appearance_mode_optionemenu.grid(row=5, column=0, padx=20, pady=(0, 40), sticky='sw')  
-
-        self.logo_label = ctk.CTkLabel(sidebar.frame, text='Login', font=ctk.CTkFont(size=20, weight='bold'))
-        self.logo_label.grid(row=1, column=0, padx=20, pady=(20, 10))
 
 
 
@@ -88,5 +80,4 @@ class Login(ctk.CTkFrame):
         except Exception as e:
             print(f"Error: {e}")
 
-    def change_appearance_mode_event(self, new_appearance_mode: str):
-        ctk.set_appearance_mode(new_appearance_mode)
+
