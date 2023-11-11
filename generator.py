@@ -17,7 +17,6 @@ class Generator(ctk.CTkToplevel):
         title = "Generated Password:"
         self.textbox.insert("1.0", title + "\n")
         self.textbox.insert("2.0", "")
-
         # create copy button
         self.copy_button = ctk.CTkButton(master=self.textbox, text="Copy", command=self.copy_to_clipboard)
         self.copy_button.grid(row=3, column=0, padx=20, pady=(20, 0), sticky="w")
