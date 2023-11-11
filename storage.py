@@ -16,11 +16,9 @@ class Storage(ctk.CTkFrame):
         sidebar.label('Storage Module')
 
 
-
-
-
-        self.new_item = ctk.CTkButton(sidebar.frame, text='New Entry')
+        self.new_item = ctk.CTkButton(sidebar.frame, text='New Entry', command=self.open_entry_frame)
         self.new_item.grid(row=2, column=0, padx=20, pady=10)
+        self.entry_window = None
 
         self.pw_generator = ctk.CTkButton(sidebar.frame, text='Pass Generator',command=self.open_toplevel)
         self.pw_generator.grid(row=3, column=0, padx=20, pady=10)
@@ -41,11 +39,20 @@ class Storage(ctk.CTkFrame):
         # Create buttons for accounts
         self.create_account_buttons()
 
+    #! Fix this 2 inside 1
     def open_toplevel(self):
         if self.toplevel_window is None or not self.toplevel_window.winfo_exists():
             self.toplevel_window = Generator(self)  # create window if its None or destroyed
         else:       
             self.toplevel_window.focus()  # if window exists focus it
+
+    def open_entry_frame(self):
+        if self.entry_window is None or not self.entry_window.winfo_exists():
+            self.entry_window = NewEntryFrame(self)  # create window if it's None or destroyed
+        else:       
+            self.entry_window.focus()  # if window exists, focus it
+
+
 
     def create_account_buttons(self):
         # Connect to the database
@@ -92,31 +99,31 @@ class Storage(ctk.CTkFrame):
 
     def create_entry_fields_and_buttons(self):
         # Clear existing widgets in the details frame
-        for widget in self.details_frame.winfo_children():
-            widget.destroy()
+        # for widget in self.details_frame.winfo_children():
+        #     # widget.destroy()
 
         # Create entries for name, username, password, and website
         self.name_entry = ctk.CTkEntry(self.details_frame)
-        self.name_entry.grid(row=0, column=1, padx=10, pady=10, sticky="w")
+        self.name_entry.grid(row=0, column=1, padx=10, pady=10, sticky="e")
 
         # Continue with other entry fields and buttons
         self.username_label = ctk.CTkLabel(self.details_frame, text="Username:")
-        self.username_label.grid(row=1, column=0, padx=10, pady=10, sticky="w")
+        self.username_label.grid(row=1, column=0, padx=10, pady=10, sticky="e")
 
         self.username_entry = ctk.CTkEntry(self.details_frame)
-        self.username_entry.grid(row=1, column=1, padx=10, pady=10, sticky="w")
+        self.username_entry.grid(row=1, column=1, padx=10, pady=10, sticky="e")
 
         self.password_label = ctk.CTkLabel(self.details_frame, text="Password:")
-        self.password_label.grid(row=2, column=0, padx=10, pady=10, sticky="w")
+        self.password_label.grid(row=2, column=0, padx=10, pady=10, sticky="e")
 
         self.password_entry = ctk.CTkEntry(self.details_frame, show="*")
-        self.password_entry.grid(row=2, column=1, padx=10, pady=10, sticky="w")
+        self.password_entry.grid(row=2, column=1, padx=10, pady=10, sticky="e")
 
         self.website_label = ctk.CTkLabel(self.details_frame, text="Website:")
-        self.website_label.grid(row=3, column=0, padx=10, pady=10, sticky="w")
+        self.website_label.grid(row=3, column=0, padx=10, pady=10, sticky="e")
 
         self.website_entry = ctk.CTkEntry(self.details_frame)
-        self.website_entry.grid(row=3, column=1, padx=10, pady=10, sticky="w")
+        self.website_entry.grid(row=3, column=1, padx=10, pady=10, sticky="e")
 
         self.save_button = ctk.CTkButton(self.details_frame, text="Save", command=self.save_details)
         self.save_button.grid(row=4, column=0, columnspan=2, pady=10)
@@ -129,6 +136,8 @@ class Storage(ctk.CTkFrame):
 
         self.open_website_button = ctk.CTkButton(self.details_frame, text="Open Website", command=self.open_website)
         self.open_website_button.grid(row=3, column=2, padx=10, pady=10)
+
+        self.details_frame.grid_propagate(False)
 
     def fetch_and_display_details(self, account_index=None):
         # Connect to the database
@@ -189,4 +198,49 @@ class Storage(ctk.CTkFrame):
         website = self.website_entry.get()
         webbrowser.open(website)
 
+    def open_new_entry_frame(self):
+        NewEntryFrame(self)
 
+
+class NewEntryFrame(ctk.CTkToplevel):
+    def __init__(self, master):
+        super().__init__(master)
+        self.resizable(False, False)
+
+        self.name_label = ctk.CTkLabel(self, text="Name:")
+        self.name_label.grid(row=0, column=0, padx=10, pady=10, sticky="e")
+        self.name_entry = ctk.CTkEntry(self)
+        self.name_entry.grid(row=0, column=1, padx=10, pady=10, sticky="e")
+
+        self.username_label = ctk.CTkLabel(self, text="Username:")
+        self.username_label.grid(row=1, column=0, padx=10, pady=10, sticky="e")
+        self.username_entry = ctk.CTkEntry(self)
+        self.username_entry.grid(row=1, column=1, padx=10, pady=10, sticky="e")
+
+        self.password_label = ctk.CTkLabel(self, text="Password:")
+        self.password_label.grid(row=2, column=0, padx=10, pady=10, sticky="e")
+        self.password_entry = ctk.CTkEntry(self, show="*")
+        self.password_entry.grid(row=2, column=1, padx=10, pady=10, sticky="e")
+
+        self.website_label = ctk.CTkLabel(self, text="Website:")
+        self.website_label.grid(row=3, column=0, padx=10, pady=10, sticky="e")
+        self.website_entry = ctk.CTkEntry(self)
+        self.website_entry.grid(row=3, column=1, padx=10, pady=10, sticky="e")
+
+        self.save_button = ctk.CTkButton(self, text="Save", command=self.save_entry)
+        self.save_button.grid(row=4, column=0, columnspan=2, pady=10)
+
+    def save_entry(self):
+        # Connect to the database
+        conn = sqlite3.connect('db_test.db')
+        cursor = conn.cursor()
+
+        # Insert new entry into the 'accounts' table
+        cursor.execute('INSERT INTO accounts (name, username, password, website) VALUES (?, ?, ?, ?)',
+                       (self.name_entry.get(), self.username_entry.get(), self.password_entry.get(), self.website_entry.get()))
+
+        conn.commit()
+        conn.close()
+
+        # Close the top-level window after saving
+        self.destroy()
