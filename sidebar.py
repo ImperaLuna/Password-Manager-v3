@@ -7,6 +7,7 @@ class SideBarFrame(ctk.CTkFrame):
         ctk.CTkFrame.__init__(self, parent)
         grey = '#212121'
         
+        #! Bug : Next 3 lines are required in order for the sideframe to be displayed properly...
         self.frame = ctk.CTkFrame(self, width=140, height=560, corner_radius=0 )
         self.frame.grid(row=1, column=0, rowspan=4, sticky='ns')  
         self.frame.grid_rowconfigure(4, weight=1)
@@ -20,7 +21,7 @@ class SideBarFrame(ctk.CTkFrame):
 
         self.appearance_mode_optionemenu = ctk.CTkOptionMenu(self.frame, values=['System', 'Light', 'Dark'],
                                                              command=self.change_appearance_mode_event)
-        self.appearance_mode_optionemenu.grid(row=7, column=0, padx=40, pady=(0, 20), sticky='sw')
+        self.appearance_mode_optionemenu.grid(row=7, column=0, padx=40, pady=(0, 40), sticky='sw')
 
 
     def change_appearance_mode_event(self, new_appearance_mode: str):
