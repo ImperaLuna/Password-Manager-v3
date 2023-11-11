@@ -32,14 +32,11 @@ class Storage(ctk.CTkFrame):
 
 
         self.scrollable_frame = ctk.CTkScrollableFrame(self, label_text="Accounts")
-        self.scrollable_frame.grid(row=0, column=1, padx=(60, 0), pady=(20, 0), sticky="ns")
-        self.scrollable_frame.grid_columnconfigure(0, weight=1)
+        self.scrollable_frame.grid(row=0, column=1, padx=20, pady=(20, 0), sticky="ns")
+        self.scrollable_frame.grid_columnconfigure(1, weight=1)
 
         self.details_frame = ctk.CTkFrame(self, width=400, height=500)  # Frame for displaying specific content
         self.details_frame.grid(row=0, column=2, padx=20, pady=20, sticky="nsew")
-
-        # Prevent the details_frame from resizing
-        self.details_frame.pack_propagate(False)
 
         # Create buttons for accounts
         self.create_account_buttons()
@@ -55,6 +52,22 @@ class Storage(ctk.CTkFrame):
         conn = sqlite3.connect('db_test.db')
         cursor = conn.cursor()
 
+        # Check if the 'accounts' table exists
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='accounts'")
+        table_exists = cursor.fetchone()
+
+        if not table_exists:
+            # If the 'accounts' table does not exist, create it
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS accounts (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name TEXT NOT NULL,
+                    username TEXT NOT NULL,
+                    password TEXT NOT NULL,
+                    website TEXT
+                )
+            ''')
+
         # Fetch account names from the database
         cursor.execute('SELECT name FROM accounts')
         account_names = cursor.fetchall()
@@ -66,6 +79,7 @@ class Storage(ctk.CTkFrame):
         for i, account_name in enumerate(account_names):
             button = ctk.CTkButton(master=self.scrollable_frame, text=account_name[0], command=lambda i=i: self.show_details(i))
             button.grid(row=i, column=0, padx=10, pady=(0, 20))
+
 
 
     def show_details(self, account_index):
@@ -141,9 +155,14 @@ class Storage(ctk.CTkFrame):
 
                 self.website_entry.delete(0, 'end')
                 self.website_entry.insert(0, website)
+            else:
+                # Handle the case where no account details are found
+                # You can display a message or perform other actions
+                print("No account details found for the selected account index.")
 
         # Close the database connection
         conn.close()
+
 
     def save_details(self):
         # Connect to the database
