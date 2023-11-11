@@ -1,5 +1,6 @@
 import customtkinter as ctk
 from sidebar import SideBarFrame
+from generator import Generator
 import sqlite3
 import pyperclip  
 import webbrowser  
@@ -16,11 +17,14 @@ class Storage(ctk.CTkFrame):
 
 
 
+
+
         self.new_item = ctk.CTkButton(sidebar.frame, text='New Entry')
         self.new_item.grid(row=2, column=0, padx=20, pady=10)
 
-        self.pw_generator = ctk.CTkButton(sidebar.frame, text='Pass Generator')
+        self.pw_generator = ctk.CTkButton(sidebar.frame, text='Pass Generator',command=self.open_toplevel)
         self.pw_generator.grid(row=3, column=0, padx=20, pady=10)
+        self.toplevel_window = None
 
         # Move the Log Out button to the bottom by changing the row index
         self.log_out = ctk.CTkButton(sidebar.frame, text='Log Out', command=lambda: controller.show_frame(Login))
@@ -39,6 +43,12 @@ class Storage(ctk.CTkFrame):
 
         # Create buttons for accounts
         self.create_account_buttons()
+
+    def open_toplevel(self):
+        if self.toplevel_window is None or not self.toplevel_window.winfo_exists():
+            self.toplevel_window = Generator(self)  # create window if its None or destroyed
+        else:       
+            self.toplevel_window.focus()  # if window exists focus it
 
     def create_account_buttons(self):
         # Connect to the database
@@ -159,3 +169,5 @@ class Storage(ctk.CTkFrame):
     def open_website(self):
         website = self.website_entry.get()
         webbrowser.open(website)
+
+
