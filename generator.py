@@ -1,6 +1,7 @@
 import customtkinter as ctk
 import random
 import string
+import sqlite3
 import pyperclip
 
 class Generator(ctk.CTkToplevel):
@@ -124,7 +125,7 @@ class Generator(ctk.CTkToplevel):
         selected_length = self.length_var.get()
         self.length_display_label.configure(text=f"Selected Length: {selected_length}")
 
-class NewEntryFrame(ctk.CTkToplevel):
+class EntryFrame(ctk.CTkToplevel):
     def __init__(self, master):
         super().__init__(master)
         self.title("New Entry")
@@ -167,3 +168,5 @@ class NewEntryFrame(ctk.CTkToplevel):
 
         # Close the top-level window after saving
         self.destroy()
+        self.master.create_account_buttons()
+

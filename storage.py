@@ -1,6 +1,6 @@
 import customtkinter as ctk
 from sidebar import SideBarFrame
-from generator import Generator
+from generator import Generator, EntryFrame
 import sqlite3
 import pyperclip  
 import webbrowser  
@@ -48,10 +48,9 @@ class Storage(ctk.CTkFrame):
 
     def open_entry_frame(self):
         if self.entry_window is None or not self.entry_window.winfo_exists():
-            self.entry_window = NewEntryFrame(self)  # create window if it's None or destroyed
+            self.entry_window = EntryFrame(self)  # create window if it's None or destroyed
         else:       
             self.entry_window.focus()  # if window exists, focus it
-
 
 
     def create_account_buttons(self):
@@ -95,6 +94,15 @@ class Storage(ctk.CTkFrame):
 
         # Fetch and display account details from the database based on the selected account
         self.fetch_and_display_details(account_index)
+
+        #!BS
+
+    def save_and_create_buttons(self):
+        # Call the save_entry method of the NewEntryFrame
+        self.new_entry_frame.save_entry()
+
+        # Call the create_account_buttons method
+        self.create_account_buttons()
 
 
     def create_entry_fields_and_buttons(self):
@@ -199,48 +207,6 @@ class Storage(ctk.CTkFrame):
         webbrowser.open(website)
 
     def open_new_entry_frame(self):
-        NewEntryFrame(self)
+        EntryFrame(self)
 
 
-class NewEntryFrame(ctk.CTkToplevel):
-    def __init__(self, master):
-        super().__init__(master)
-        self.resizable(False, False)
-
-        self.name_label = ctk.CTkLabel(self, text="Name:")
-        self.name_label.grid(row=0, column=0, padx=10, pady=10, sticky="e")
-        self.name_entry = ctk.CTkEntry(self)
-        self.name_entry.grid(row=0, column=1, padx=10, pady=10, sticky="e")
-
-        self.username_label = ctk.CTkLabel(self, text="Username:")
-        self.username_label.grid(row=1, column=0, padx=10, pady=10, sticky="e")
-        self.username_entry = ctk.CTkEntry(self)
-        self.username_entry.grid(row=1, column=1, padx=10, pady=10, sticky="e")
-
-        self.password_label = ctk.CTkLabel(self, text="Password:")
-        self.password_label.grid(row=2, column=0, padx=10, pady=10, sticky="e")
-        self.password_entry = ctk.CTkEntry(self, show="*")
-        self.password_entry.grid(row=2, column=1, padx=10, pady=10, sticky="e")
-
-        self.website_label = ctk.CTkLabel(self, text="Website:")
-        self.website_label.grid(row=3, column=0, padx=10, pady=10, sticky="e")
-        self.website_entry = ctk.CTkEntry(self)
-        self.website_entry.grid(row=3, column=1, padx=10, pady=10, sticky="e")
-
-        self.save_button = ctk.CTkButton(self, text="Save", command=self.save_entry)
-        self.save_button.grid(row=4, column=0, columnspan=2, pady=10)
-
-    def save_entry(self):
-        # Connect to the database
-        conn = sqlite3.connect('db_test.db')
-        cursor = conn.cursor()
-
-        # Insert new entry into the 'accounts' table
-        cursor.execute('INSERT INTO accounts (name, username, password, website) VALUES (?, ?, ?, ?)',
-                       (self.name_entry.get(), self.username_entry.get(), self.password_entry.get(), self.website_entry.get()))
-
-        conn.commit()
-        conn.close()
-
-        # Close the top-level window after saving
-        self.destroy()
