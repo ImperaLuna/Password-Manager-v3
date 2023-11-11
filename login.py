@@ -18,9 +18,6 @@ class Login(ctk.CTkFrame):
         sidebar.label('Login')
 
 
-
-
-
         # Get the directory where the script is located
         script_dir = os.path.dirname(os.path.abspath(__file__))
         self.db_path = os.path.join(script_dir, 'user_credentials.db')
@@ -39,7 +36,7 @@ class Login(ctk.CTkFrame):
         checkbox = ctk.CTkCheckBox(master=self.login_frame, text="Remember Me")
         checkbox.grid(row=2, column=0, pady=6, padx=50, sticky='ew')
 
-        button = ctk.CTkButton(master=self.login_frame, text="Login", command=self.login)
+        button = ctk.CTkButton(master=self.login_frame, text="Login", command=lambda: self.login(controller, Storage))
         button.grid(row=3, column=0, pady=6, padx=50, sticky='ew')
 
         register = ctk.CTkButton(master=self.login_frame, text='Register',  
@@ -55,7 +52,7 @@ class Login(ctk.CTkFrame):
         button_skip.grid(row=7, column=0, padx=12, sticky='ew')
 
     # Login Logic
-    def login(self):
+    def login(self, controller, Storage):
         connect = sqlite3.connect(self.db_path)
         cursor = connect.cursor()
 
@@ -71,12 +68,11 @@ class Login(ctk.CTkFrame):
             result = cursor.fetchone()
             if result:
                 if bcrypt.checkpw(password_input.encode('utf-8'), result[0]):
-                    print('login correct')
-                    self.master.switch_to_generator_window()
+                    controller.show_frame(Storage)
                 else:
-                    print('login failed')
+                    self.error_label.configure(text='login failed')
             else:
-                print('invalid username')
+                self.error_label.configure(text='invalid username')
         except Exception as e:
             print(f"Error: {e}")
 
