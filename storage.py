@@ -242,6 +242,9 @@ class Storage(ctk.CTkFrame):
             self.password_entry.insert(0, '*' * len(password))
 
             print("Details updated successfully.")
+
+            self.create_account_buttons()
+            
         else:
             print("Record not found for the given ID.")
 
