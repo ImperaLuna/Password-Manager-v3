@@ -82,31 +82,34 @@ class Storage(ctk.CTkFrame):
     def create_entry_widgets(self, account_name):
         # Destroy previous widgets in the details frame
         self.destroy_entry_widgets()
-
+        
+ 
         # Fetch account details based on the provided account_name
         conn = sqlite3.connect('db_test.db')
         cursor = conn.cursor()
-        cursor.execute('SELECT name, username, password, website FROM accounts WHERE name=?', (account_name,))
+        cursor.execute('SELECT id, name, username, password, website FROM accounts WHERE name=?', (account_name,))
         account_details = cursor.fetchone()
         conn.close()
 
         if account_details:
+            self.current_id = account_details[0]
+            print(self.current_id)
             # Create entry widgets with the fetched details
             self.name_entry = ctk.CTkEntry(self.details_frame)
             self.name_entry.grid(row=0, column=1, padx=10, pady=10, sticky="e")
-            self.name_entry.insert(0, account_details[0])
+            self.name_entry.insert(0, account_details[1])
 
             self.username_entry = ctk.CTkEntry(self.details_frame)
             self.username_entry.grid(row=1, column=1, padx=10, pady=10, sticky="e")
-            self.username_entry.insert(0, account_details[1])
+            self.username_entry.insert(0, account_details[2])
 
             self.password_entry = ctk.CTkEntry(self.details_frame, show="*")
             self.password_entry.grid(row=2, column=1, padx=10, pady=10, sticky="e")
-            self.password_entry.insert(0, account_details[2])
+            self.password_entry.insert(0, account_details[3])
 
             self.website_entry = ctk.CTkEntry(self.details_frame)
             self.website_entry.grid(row=3, column=1, padx=10, pady=10, sticky="e")
-            self.website_entry.insert(0, account_details[3])
+            self.website_entry.insert(0, account_details[4])
 
             self.save_button = ctk.CTkButton(self.details_frame, text="Save", command=self.update_details)
             self.save_button.grid(row=4, column=0, columnspan=2, pady=10)
@@ -124,13 +127,14 @@ class Storage(ctk.CTkFrame):
 
     def destroy_entry_widgets(self):
         for widget in self.details_frame.winfo_children():
-            widget.destroy()
+                widget.grid_remove()
 
     def destroy_account_buttons(self):
         for widget in self.scrollable_frame.winfo_children():
             widget.destroy()
 
     def show_details(self, account_index):
+        print("Show details called")
         self.create_entry_fields_and_buttons()
         self.fetch_and_display_details(account_index)
 
@@ -153,9 +157,7 @@ class Storage(ctk.CTkFrame):
         self.save_button = ctk.CTkButton(self.details_frame, text="Save", command=self.update_details)
         self.save_button.grid(row=len(fields), column=0, columnspan=2, pady=10)
 
-
         self.details_frame.grid_propagate(False)
-
 
     def fetch_and_display_details(self, account_index=None):
         conn = sqlite3.connect('db_test.db')
@@ -164,6 +166,8 @@ class Storage(ctk.CTkFrame):
         if account_index is not None:
             cursor.execute('SELECT name, username, password, website FROM accounts LIMIT 1 OFFSET ?', (account_index,))
             account_details = cursor.fetchone()
+
+            print(f"Fetched details from database - {account_details}")
 
             if account_details:
                 # Ensure entry widgets are created
@@ -188,16 +192,62 @@ class Storage(ctk.CTkFrame):
 
         conn.close()
 
+    def get_id_for_update(self, current_id):
+        conn = sqlite3.connect('db_test.db')
+        cursor = conn.cursor()
 
+        # Fetch the id based on the current_id
+        cursor.execute('SELECT id FROM accounts WHERE id=?', (current_id,))
+        result = cursor.fetchone()
+
+        # Print statements for debugging
+        print(f"Current ID: {current_id}")
+        print(f"SQL Query result: {result}")
+
+        # Close the database connection
+        conn.close()
+
+        if result:
+            return result[0]  # Return the id
+        else:
+            # Handle the case where the current_id is not found
+            return None
 
     def update_details(self):
-        pass
+        # Get values from entry widgets
+        name = self.name_entry.get()
+        username = self.username_entry.get()
+        password = self.password_entry.get()
+        website = self.website_entry.get()
 
+        # Get the id for the update
+        current_id = self.get_id_for_update(self.current_id)  # Use self.current_id here
 
+        if current_id is not None:
+            # Connect to the database
+            conn = sqlite3.connect('db_test.db')
+            cursor = conn.cursor()
 
+            # Update the database with the new values using the current_id
+            cursor.execute('UPDATE accounts SET name=?, username=?, password=?, website=? WHERE id=?', (name, username, password, website, current_id))
+
+            # Commit the changes to the database
+            conn.commit()
+
+            # Close the database connection
+            conn.close()
+
+            # Update the displayed asterisks in the password entry widget
+            self.password_entry.delete(0, 'end')
+            self.password_entry.insert(0, '*' * len(password))
+
+            print("Details updated successfully.")
+        else:
+            print("Record not found for the given ID.")
 
     def copy_username(self):
         username = self.username_entry.get()
+        print(f'{username}')
         pyperclip.copy(username)
 
     def copy_password(self):
@@ -205,7 +255,7 @@ class Storage(ctk.CTkFrame):
         pyperclip.copy(password)
 
     def open_website(self):
-        website = self.website_entry.get()
+        website = self.entry_widgets["website"].get()
         webbrowser.open(website)
 
     def open_new_entry_frame(self):
