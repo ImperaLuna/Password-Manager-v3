@@ -126,7 +126,7 @@ class Generator(ctk.CTkToplevel):
         self.length_display_label.configure(text=f"Selected Length: {selected_length}")
 
 class EntryFrame(ctk.CTkToplevel):
-    def __init__(self, master):
+    def __init__(self, master, refresh_callback):
         super().__init__(master)
         self.title("New Entry")
         self.resizable(False, False)
@@ -151,22 +151,19 @@ class EntryFrame(ctk.CTkToplevel):
         self.website_entry = ctk.CTkEntry(self)
         self.website_entry.grid(row=3, column=1, padx=10, pady=10, sticky="e")
 
-        self.save_button = ctk.CTkButton(self, text="Save", command=self.save_entry)
+        self.save_button = ctk.CTkButton(self, text="Save", command=lambda: self.save_entry(refresh_callback))
         self.save_button.grid(row=4, column=0, columnspan=2, pady=10)
 
-    def save_entry(self):
-        # Connect to the database
+    def save_entry(self, refresh_callback):
         conn = sqlite3.connect('db_test.db')
         cursor = conn.cursor()
 
-        # Insert new entry into the 'accounts' table
         cursor.execute('INSERT INTO accounts (name, username, password, website) VALUES (?, ?, ?, ?)',
                        (self.name_entry.get(), self.username_entry.get(), self.password_entry.get(), self.website_entry.get()))
 
         conn.commit()
         conn.close()
 
-        # Close the top-level window after saving
         self.destroy()
-        self.master.create_account_buttons()
+        refresh_callback()
 
