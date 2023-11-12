@@ -1,0 +1,3 @@
+fix pasword coping ***
+add bcrypt to password for db_Test
+create a db for each user
