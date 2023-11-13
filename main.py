@@ -1,4 +1,7 @@
 import customtkinter as ctk
+from login import Login
+from register import Register
+from storage import Storage
 
 
 ctk.set_appearance_mode('system')
@@ -10,9 +13,7 @@ class MainApp(ctk.CTk):
     def __init__(self): 
         ctk.CTk.__init__(self)
 
-        from login import Login
-        from register import Register
-        from storage import Storage
+
 
         self.title('Password Manager')
         self.geometry('960x540')
@@ -36,6 +37,7 @@ class MainApp(ctk.CTk):
         frame = self.frames[cont]
         frame.tkraise()
     
+
 
 
 if __name__ == "__main__":
