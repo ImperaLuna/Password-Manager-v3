@@ -167,4 +167,3 @@ class EntryFrame(ctk.CTkToplevel):
 
         self.destroy()
         refresh_callback()
-

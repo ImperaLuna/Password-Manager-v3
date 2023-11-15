@@ -86,9 +86,9 @@ class Login(ctk.CTkFrame):
                         self.clear_login()
 
                 else:
-                    self.error_label.configure(text="Invalid password")
+                    self.error_label.configure(text="Invalid password", fg_color="red")
             else:
-                self.error_label.configure(text="Invalid username")
+                self.error_label.configure(text="Invalid username", fg_color="red")
         except Exception as e:
             print(f"Error: {e}")
         finally:
