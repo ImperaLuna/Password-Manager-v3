@@ -43,6 +43,7 @@ class Generator(ctk.CTkToplevel):
 
         # update the label when the slider value changes
         self.length_slider.bind("<B1-Motion>", lambda event: self.update_length_display())
+        self.length_slider.bind("<ButtonRelease-1>", lambda event: self.update_length_display())
 
         # create generate button
         self.generate_button = ctk.CTkButton(master=self.checkbox_slider_frame, text="Generate", command=self.generate_new_password)
@@ -166,4 +167,3 @@ class EntryFrame(ctk.CTkToplevel):
 
         self.destroy()
         refresh_callback()
-

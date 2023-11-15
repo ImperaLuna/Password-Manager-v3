@@ -236,10 +236,6 @@ class Storage(ctk.CTkFrame):
             # Close the database connection
             conn.close()
 
-            # Update the displayed asterisks in the password entry widget
-            self.password_entry.delete(0, 'end')
-            self.password_entry.insert(0, '*' * len(password))
-
             print("Details updated successfully.")
 
             self.create_account_buttons()
