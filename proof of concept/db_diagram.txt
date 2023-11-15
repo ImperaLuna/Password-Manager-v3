@@ -1,0 +1,30 @@
+// Use DBML to define your database structure
+// Docs: https://dbml.dbdiagram.io/docs
+
+Table Users {
+  id integer
+  username varchar(256)
+  password carchar(256) 
+  encryption_key BLOB
+}
+
+Table Websites {
+  id integer 
+  url varchar
+}
+
+Table Credentials {
+  id integer 
+  entry_name varchar(256)
+  entry_username varchar(256)
+  entry_password varchar(256)
+  User_id integer
+  Websites_id integer
+}
+
+
+
+
+Ref: "Websites"."id" < "Credentials"."Websites_id"
+  
+Ref: "Users"."id" < "Credentials"."User_id"
