@@ -1,4 +1,2 @@
-
-add bcrypt to password for db_Test
-fix pasword coping ***
+fix pasword coping *** -- caused by not refreshing the entries after asve
 create a db for each user

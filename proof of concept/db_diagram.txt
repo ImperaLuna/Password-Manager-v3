@@ -5,6 +5,7 @@ Table Users {
   id integer
   username varchar(256)
   password carchar(256) 
+  encryption_key BLOB
 }
 
 Table Websites {

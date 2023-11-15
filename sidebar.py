@@ -6,7 +6,7 @@ class SideBarFrame(ctk.CTkFrame):
     def __init__(self, parent, controller): 
         ctk.CTkFrame.__init__(self, parent)
         grey = '#212121'
-        
+
         #! Bug : Next 3 lines are required in order for the sideframe to be displayed properly...
         self.frame = ctk.CTkFrame(self, width=140, height=560, corner_radius=0 )
         self.frame.grid(row=1, column=0, rowspan=4, sticky='ns')  
