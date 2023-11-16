@@ -1,5 +1,3 @@
-# login.py
-
 import sqlite3
 import bcrypt
 import os
@@ -71,12 +69,15 @@ class Login(ctk.CTkFrame):
                 self.error_label.configure(text="Please enter username and password", fg_color="red")
                 return
 
-            cursor.execute("SELECT Password FROM Users WHERE Username=?", [username_input,])
+            cursor.execute("SELECT ID, Password FROM Users WHERE Username=?", [username_input,])
             result = cursor.fetchone()
 
             if result:
-                if bcrypt.checkpw(password_input.encode("utf-8"), result[0]):
+                user_id, hashed_password = result
+                if bcrypt.checkpw(password_input.encode("utf-8"), hashed_password):
                     controller.show_frame(storage_class)
+
+                    self.save_user_id(user_id)
 
                     # Save credentials if the "Remember Me" checkbox is checked
                     if checkbox_execute:
@@ -161,5 +162,5 @@ class Login(ctk.CTkFrame):
             self.username.delete(0, ctk.END)
             self.password.delete(0, ctk.END)
 
-
-
+    def save_user_id(self, user_id):
+        self.user_id = user_id

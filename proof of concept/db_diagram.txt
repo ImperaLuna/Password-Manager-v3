@@ -8,10 +8,7 @@ Table Users {
   encryption_key BLOB
 }
 
-Table Websites {
-  id integer 
-  url varchar
-}
+
 
 Table Credentials {
   id integer 
@@ -22,6 +19,10 @@ Table Credentials {
   Websites_id integer
 }
 
+Table Websites {
+  id integer 
+  url varchar
+}
 
 
 
