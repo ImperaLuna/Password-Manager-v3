@@ -22,26 +22,34 @@ class MainApp(ctk.CTk):
         container = ctk.CTkFrame(self)
         container.grid()
 
-        # Create a dictionary with class references
         class_references = {
             "Login": Login,
             "Register": Register,
             "Storage": Storage,
         }
 
+        user_id = 0
         self.frames = {}
         for window_name, window_class in class_references.items():
-            frame = window_class(container, self)
+            frame = window_class(container, self, user_id)
             self.frames[window_name] = frame
             frame.grid(row=0, column=0, sticky="nsew")
 
 
         self.show_frame("Login")
 
+    def show_frame(self, window):
+        frame = self.frames[window]
 
-    def show_frame(self, cont):
-        frame = self.frames[cont]
+        # If switching to the Storage frame, pass the user_id
+        if window == "Storage":
+            user_id = self.frames["Login"].get_user_id()
+            self.frames["Storage"].create_account_buttons()
+            print(f'user id inside show frame is:{user_id}')
+            frame.set_user_id(user_id)
+
         frame.tkraise()
+
 
     def setup_database(self):
         """

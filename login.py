@@ -7,7 +7,7 @@ import json
 from cryptography.fernet import Fernet
 
 class Login(ctk.CTkFrame):
-    def __init__(self, parent, controller):
+    def __init__(self, parent, controller, user_id):
         ctk.CTkFrame.__init__(self, parent)
 
        # Create an instance of SideBarFrame
@@ -15,7 +15,7 @@ class Login(ctk.CTkFrame):
         sidebar.grid(row=0, column=0, rowspan=4, sticky="ns")
         sidebar.label("Login")
 
-
+        self.user_id = None
 
         # Get the directory where the script is located
         script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -75,9 +75,10 @@ class Login(ctk.CTkFrame):
             if result:
                 user_id, hashed_password = result
                 if bcrypt.checkpw(password_input.encode("utf-8"), hashed_password):
+                    self.save_user_id(user_id)
                     controller.show_frame(storage_class)
 
-                    self.save_user_id(user_id)
+
 
                     # Save credentials if the "Remember Me" checkbox is checked
                     if checkbox_execute:
@@ -164,3 +165,8 @@ class Login(ctk.CTkFrame):
 
     def save_user_id(self, user_id):
         self.user_id = user_id
+        print(f'user id is:{user_id}')
+
+    def get_user_id(self):
+        return self.user_id
+
