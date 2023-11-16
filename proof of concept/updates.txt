@@ -1,2 +1,1 @@
-create a db for each user
-save function inside generator.py needs to be updated to new db
+delete entry widgets on logout.
