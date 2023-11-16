@@ -129,11 +129,11 @@ class Generator(ctk.CTkToplevel):
         self.length_display_label.configure(text=f"Selected Length: {selected_length}")
 
 class EntryFrame(ctk.CTkToplevel):
-    def __init__(self, master, refresh_callback):
+    def __init__(self, master, refresh_callback, user_id):
         super().__init__(master)
         self.title("New Entry")
         self.resizable(False, False)
-        self.user_id = 3
+        self.user_id = user_id
 
         self.name_label = ctk.CTkLabel(self, text="Name:")
         self.name_label.grid(row=0, column=0, padx=10, pady=10, sticky="e")

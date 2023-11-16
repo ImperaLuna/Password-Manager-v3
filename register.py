@@ -45,7 +45,7 @@ class Register(ctk.CTkFrame):
         - button_register_event: Handles the registration process.
         - reveal_password: Toggles the visibility of password.
     """
-    def __init__(self, parent, controller):
+    def __init__(self, parent, controller, user_id):
         ctk.CTkFrame.__init__(self, parent)
 
 

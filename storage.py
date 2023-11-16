@@ -7,7 +7,7 @@ import pyperclip
 import webbrowser
 
 class Storage(ctk.CTkFrame):
-    def __init__(self, parent, controller):
+    def __init__(self, parent, controller, user_id):
         ctk.CTkFrame.__init__(self, parent)
 
 
@@ -15,7 +15,8 @@ class Storage(ctk.CTkFrame):
         sidebar.grid(row=0, column=0, rowspan=4, sticky="ns")
         sidebar.label("Storage Module")
 
-        self.user_id = 2
+        self.user_id = user_id
+
 
         self.new_item = ctk.CTkButton(sidebar.frame, text="New Entry", command=self.open_entry_frame)
         self.new_item.grid(row=2, column=0, padx=20, pady=10)
@@ -35,7 +36,7 @@ class Storage(ctk.CTkFrame):
         self.details_frame = ctk.CTkFrame(self, width=400, height=500)
         self.details_frame.grid(row=0, column=2, padx=20, pady=20, sticky="nsew")
 
-        self.create_account_buttons()
+
 
     def open_toplevel(self):
         if self.toplevel_window is None or not self.toplevel_window.winfo_exists():
@@ -45,11 +46,12 @@ class Storage(ctk.CTkFrame):
 
     def open_entry_frame(self):
         if self.entry_window is None or not self.entry_window.winfo_exists():
-            self.entry_window = EntryFrame(self, self.create_account_buttons)
+            self.entry_window = EntryFrame(self, self.create_account_buttons, self.user_id)
         else:
             self.entry_window.focus()
 
     def create_account_buttons(self):
+        print(f'The value inside Storage is: {self.user_id}')
         script_dir = os.path.dirname(os.path.abspath(__file__))
         database_folder = os.path.join(script_dir, "database")
         os.makedirs(database_folder, exist_ok=True)
@@ -58,6 +60,8 @@ class Storage(ctk.CTkFrame):
         with sqlite3.connect(self.db_path) as connection:
             connect = sqlite3.connect(self.db_path)
             cursor = connect.cursor()
+
+
 
 
         cursor.execute('SELECT name FROM sqlite_master WHERE type="table" AND name="UserData"')
@@ -292,4 +296,8 @@ class Storage(ctk.CTkFrame):
 
     def open_new_entry_frame(self):
         print(f'{self.user_id}')
-        EntryFrame(self, self.create_account_buttons)
+        EntryFrame(self, self.create_account_buttons, self.user_id)
+
+    def set_user_id(self, user_id):
+        self.user_id = user_id
+        self.create_account_buttons()
