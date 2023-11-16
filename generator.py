@@ -1,4 +1,5 @@
 import customtkinter as ctk
+import os
 import random
 import string
 import sqlite3
@@ -9,6 +10,7 @@ class Generator(ctk.CTkToplevel):
         super().__init__(master)
         self.geometry("490x430")
         self.resizable(False, False)
+
 
         # create textbox
         self.textbox = ctk.CTkTextbox(self, width=50, height=10)
@@ -131,6 +133,7 @@ class EntryFrame(ctk.CTkToplevel):
         super().__init__(master)
         self.title("New Entry")
         self.resizable(False, False)
+        self.user_id = 3
 
         self.name_label = ctk.CTkLabel(self, text="Name:")
         self.name_label.grid(row=0, column=0, padx=10, pady=10, sticky="e")
@@ -156,11 +159,20 @@ class EntryFrame(ctk.CTkToplevel):
         self.save_button.grid(row=4, column=0, columnspan=2, pady=10)
 
     def save_entry(self, refresh_callback):
-        conn = sqlite3.connect('db_test.db')
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        database_folder = os.path.join(script_dir, "database")
+        os.makedirs(database_folder, exist_ok=True)
+        self.db_path = os.path.join(database_folder, "AccessControlDB.db")
+
+
+        conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
-        cursor.execute('INSERT INTO accounts (name, username, password, website) VALUES (?, ?, ?, ?)',
-                       (self.name_entry.get(), self.username_entry.get(), self.password_entry.get(), self.website_entry.get()))
+        cursor.execute('INSERT INTO UserData (entry_name, entry_username, entry_password, entry_website, User_id) VALUES (?, ?, ?, ?, ?)',
+                    (self.name_entry.get(), self.username_entry.get(), self.password_entry.get(), self.website_entry.get(), self.user_id))
+
+
+
 
         conn.commit()
         conn.close()

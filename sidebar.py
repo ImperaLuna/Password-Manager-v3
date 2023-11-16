@@ -3,17 +3,17 @@ import customtkinter as ctk
 
 #todo make method to add upper/lower buttons
 class SideBarFrame(ctk.CTkFrame):
-    def __init__(self, parent, controller): 
+    def __init__(self, parent, controller):
         ctk.CTkFrame.__init__(self, parent)
         grey = '#212121'
 
         #! Bug : Next 3 lines are required in order for the sideframe to be displayed properly...
         self.frame = ctk.CTkFrame(self, width=140, height=560, corner_radius=0 )
-        self.frame.grid(row=1, column=0, rowspan=4, sticky='ns')  
+        self.frame.grid(row=1, column=0, rowspan=4, sticky='ns')
         self.frame.grid_rowconfigure(4, weight=1)
 
         self.frame = ctk.CTkFrame(self, width=140, height=560, corner_radius=0, fg_color=grey)
-        self.frame.grid(row=1, column=0, rowspan=4, sticky='ns')  
+        self.frame.grid(row=1, column=0, rowspan=4, sticky='ns')
         self.frame.grid_rowconfigure(4, weight=1)
 
         self.appearance_mode_label = ctk.CTkLabel(self.frame, text='Appearance Mode:', anchor='sw')
