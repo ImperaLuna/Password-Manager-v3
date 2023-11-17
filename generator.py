@@ -29,28 +29,26 @@ class Generator(ctk.CTkToplevel):
         self.geometry("490x430")
         self.resizable(False, False)
 
-
-        # create textbox
         self.textbox = ctk.CTkTextbox(self, width=50, height=10)
         self.textbox.grid(row=0, column=0, padx=(20, 0), pady=(20, 0), sticky="nsew")
 
-        # text for Password
         title = "Generated Password:"
         self.textbox.insert("1.0", title + "\n")
         self.textbox.insert("2.0", "")
-        # create copy button
+
         self.copy_button = ctk.CTkButton(master=self.textbox, text="Copy",
                                           command=self.copy_to_clipboard)
         self.copy_button.grid(row=3, column=0, padx=20, pady=(20, 0), sticky="w")
 
-        # create checkbox and switch frame
+
         self.checkbox_slider_frame = ctk.CTkFrame(self)
         self.checkbox_slider_frame.grid(row=0, column=1, padx=(20, 20), pady=(20, 0), sticky="nsew")
+
         checkbox_label = ctk.CTkLabel(master=self.checkbox_slider_frame,
                                        text="Password Strength")
         checkbox_label.grid(row=0, column=0, padx=(20, 0), pady=(20, 0), columnspan=2)
 
-        # create slider for password length
+
         self.length_slider_label = ctk.CTkLabel(master=self.checkbox_slider_frame,
                                                 text="Password Length:")
         self.length_slider_label.grid(row=1, column=0, padx=20, pady=(20, 0), sticky="w")
@@ -63,7 +61,7 @@ class Generator(ctk.CTkToplevel):
         self.length_slider.grid(row=2, column=0, padx=20, pady=(20, 0), sticky="w")
         self.length_var.set(8)  # Set default value
 
-        # display the selected length
+
         self.length_display_label = ctk.CTkLabel(master=self.checkbox_slider_frame,
                                                 text="Selected Length: 8")
         self.length_display_label.grid(row=3, column=0, padx=20, pady=(10, 0), sticky="w")
@@ -72,12 +70,12 @@ class Generator(ctk.CTkToplevel):
         self.length_slider.bind("<B1-Motion>", lambda event: self.update_length_display())
         self.length_slider.bind("<ButtonRelease-1>", lambda event: self.update_length_display())
 
-        # create generate button
+
         self.generate_button = ctk.CTkButton(master=self.checkbox_slider_frame,
                                               text="Generate", command=self.generate_new_password)
         self.generate_button.grid(row=4, column=0, padx=20, pady=(20, 0), sticky="w")
 
-        # create variables to store checkbox states
+
         self.checkbox_1_var = ctk.BooleanVar()
         self.checkbox_2_var = ctk.BooleanVar()
         self.checkbox_3_var = ctk.BooleanVar()
@@ -171,11 +169,10 @@ class Generator(ctk.CTkToplevel):
                     use_numbers=use_numbers,
                     use_symbols=use_symbols)
 
-                # Insert an empty line before the generated password
                 self.textbox.delete("2.0", "end-1c")  # Clear the existing generated password
                 self.textbox.insert("2.0", generated_password)
+
             except IndexError:
-                # Handle the error gracefully (optional: you can print a message or leave it blank)
                 pass
 
 
@@ -262,11 +259,7 @@ class EntryFrame(ctk.CTkToplevel):
 
 
         cursor.execute(query, values)
-
-
-
         conn.commit()
         conn.close()
 
-        self.destroy()
         refresh_callback()
