@@ -31,7 +31,7 @@ class SideBarFrame(ctk.CTkFrame):
     1. Create an instance of SideBarFrame in your GUI application.
     2. Customize the appearance mode options and labels as needed.
     """
-    def __init__(self, parent): # do i need to add controller?
+    def __init__(self, parent, controller):
         ctk.CTkFrame.__init__(self, parent)
         grey = '#212121'
 
