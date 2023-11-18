@@ -8,11 +8,6 @@ using the bcrypt library for security.
 
 Classes:
     Register: A customtkinter frame for user registration.
-
-Note:
-    The module assumes the existence of the customtkinter library,
-    the login module, and the sidebar module for proper functioning.
-    It also requires the bcrypt library for password hashing.
 """
 
 import os
@@ -40,8 +35,6 @@ class Register(ctk.CTkFrame):
         - error_label (ctk.CTkLabel): Label for displaying error messages during registration.
 
     Methods:
-        - __init__: Initializes the Register class, setting up the form and components.
-        - setup_database: Set up the SQLite database for user registration.
         - button_register_event: Handles the registration process.
         - reveal_password: Toggles the visibility of password.
     """
@@ -111,7 +104,6 @@ class Register(ctk.CTkFrame):
         os.makedirs(database_folder, exist_ok=True)
         self.db_path = os.path.join(database_folder, "AccessControlDB.db")
 
-        # Check if the database file already exists
 
         with sqlite3.connect(self.db_path) as connection:
             self.connect = connection
@@ -121,7 +113,7 @@ class Register(ctk.CTkFrame):
         password = self.password.get()
         repeat_password = self.repeat_password.get()
 
-        # User input handling
+
         try:
             if not username or not password or not repeat_password:
                 self.error_label.configure(text="Please fill in all fields", fg_color="red")
@@ -131,7 +123,7 @@ class Register(ctk.CTkFrame):
                 self.error_label.configure(text="Passwords do not match", fg_color="red")
                 return
 
-            # Register User
+
             self.cursor.execute("SELECT username FROM Users WHERE username=?", [username])
             if self.cursor.fetchone() is not None:
                 self.error_label.configure(text="Username already exists", fg_color="red")
