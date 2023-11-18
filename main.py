@@ -1,4 +1,18 @@
-# main.py
+"""
+Password Manager Application
+
+This module implements the main functionality of a Password Manager application using
+customtkinter for the graphical user interface and SQLite for database storage.
+
+Classes:
+    - MainApp: The main application class that initializes the GUI,
+    manages frames for different windows (Login, Register, Storage),
+    and sets up the SQLite database for user registration.
+
+Usage:
+    Run this module to launch the Password Manager application.
+    The application provides features for user login, registration, and storage of passwords.
+"""
 
 import customtkinter as ctk
 import os
@@ -11,6 +25,26 @@ ctk.set_appearance_mode("system")
 ctk.set_default_color_theme("orange")
 
 class MainApp(ctk.CTk):
+    """
+    Main application class for the Password Manager.
+
+    This class initializes the GUI for the Password Manager application:
+    - including the main window title, size, and configuration
+    - it sets up the SQLite database
+    - creates instances of frames for login, registration, and storage
+    - displays the initial "Login" frame.
+
+    Attributes:
+        - frames (dict): A dictionary to store instances of different frames
+            for switching between windows.
+
+    Methods:
+        show_frame: Displays the specified frame within the Tkinter application.
+        setup_database: Sets up the SQLite database for user registration.
+
+    Usage:
+        Create an instance of this class to run the Password Manager application.
+    """
     def __init__(self):
         ctk.CTk.__init__(self)
         self.setup_database()
@@ -39,15 +73,32 @@ class MainApp(ctk.CTk):
         self.show_frame("Login")
 
     def show_frame(self, window):
+        """
+        Display the specified frame within the application.
+
+        Parameters:
+            window (str): The name of the frame to be displayed, such as
+              "Login," "Register," or "Storage."
+
+        Behavior:
+            - If switching to the "Storage" frame, pass the user_id
+                to generate user data buttons inside the scrollable frame.
+            - Calls the `set_user_id` method on the target frame to set the user_id.
+            - Calls the `create_account_buttons` method on the "Storage" frame
+                to generate account buttons.
+            - Raises the specified frame to the front.
+
+        Args:
+            - window (str): The name of the frame to be displayed.
+        """
         frame = self.frames[window]
 
-        # If switching to the Storage frame, pass the user_id
+        # If switching to the Storage frame, pass the user_id in order to
+        #  generate the user data buttons inside the scrollable frame
         if window == "Storage":
             user_id = self.frames["Login"].get_user_id()
             frame.set_user_id(user_id)
             self.frames["Storage"].create_account_buttons()
-            print(f'user id inside show frame is:{user_id}')
-
 
         frame.tkraise()
 
@@ -73,7 +124,6 @@ class MainApp(ctk.CTk):
         os.makedirs(database_folder, exist_ok=True)
         self.db_path = os.path.join(database_folder, "AccessControlDB.db")
 
-        # Check if the database file already exists
         if not os.path.exists(self.db_path):
             with sqlite3.connect(self.db_path) as connection:
                 self.connect = connection
