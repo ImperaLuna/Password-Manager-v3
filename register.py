@@ -8,11 +8,6 @@ using the bcrypt library for security.
 
 Classes:
     Register: A customtkinter frame for user registration.
-
-Note:
-    The module assumes the existence of the customtkinter library,
-    the login module, and the sidebar module for proper functioning.
-    It also requires the bcrypt library for password hashing.
 """
 
 import os

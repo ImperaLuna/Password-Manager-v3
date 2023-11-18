@@ -179,8 +179,6 @@ class Storage(ctk.CTkFrame):
 
         self.details_frame.grid_propagate(False)
 
-
-    #! This will not work
     def fetch_and_display_details(self, account_index=None):
 
         script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -300,4 +298,4 @@ class Storage(ctk.CTkFrame):
 
     def set_user_id(self, user_id):
         self.user_id = user_id
-        self.create_account_buttons()
+        #self.create_account_buttons()

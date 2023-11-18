@@ -262,4 +262,5 @@ class EntryFrame(ctk.CTkToplevel):
         conn.commit()
         conn.close()
 
+        #calling create_account_buttons() from storage module to refresh the buttons
         refresh_callback()

@@ -44,9 +44,10 @@ class MainApp(ctk.CTk):
         # If switching to the Storage frame, pass the user_id
         if window == "Storage":
             user_id = self.frames["Login"].get_user_id()
+            frame.set_user_id(user_id)
             self.frames["Storage"].create_account_buttons()
             print(f'user id inside show frame is:{user_id}')
-            frame.set_user_id(user_id)
+
 
         frame.tkraise()
 
