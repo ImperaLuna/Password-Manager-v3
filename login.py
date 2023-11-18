@@ -100,6 +100,13 @@ class Login(ctk.CTkFrame):
 
 
     def login(self, controller, storage_class):
+        """
+        Handles user authentication.
+
+        Parameters:
+        - controller: An instance of the application controller used for frame switching.
+        - storage_class: The class representing the storage frame in the application.
+        """
         connect = sqlite3.connect(self.db_path)
         cursor = connect.cursor()
 
@@ -139,6 +146,15 @@ class Login(ctk.CTkFrame):
             connect.close()
 
     def save_credentials(self, username, password):
+        """
+        Saves the user's credentials (username and password) in a JSON file.
+        Encrypts the password using they key from the database or generates
+        a new one if it doesn't exist
+
+        Parameters:
+        - username: The username to be saved.
+        - password: The password to be saved.
+        """
         connect = sqlite3.connect(self.db_path)
         cursor = connect.cursor()
 
@@ -164,6 +180,11 @@ class Login(ctk.CTkFrame):
             json.dump(credentials, f)
 
     def check_credentials_file(self):
+        """
+        Checks if there is a stored credentials file. If found, reads the credentials,
+        decrypts the password, and populates the username and password entry fields accordingly.
+        Also sets the "Remember Me" checkbox if credentials are loaded successfully.
+        """
         connect = sqlite3.connect(self.db_path)
         cursor = connect.cursor()
 
@@ -191,6 +212,9 @@ class Login(ctk.CTkFrame):
             self.checkbox_var.set(False)
 
     def delete_credentials(self):
+        """
+        Deletes the stored credentials file if it exists.
+        """
         db_folder = os.path.dirname(self.db_path)
         db_credentials_path = os.path.join(db_folder, "credentials.json")
         try:
@@ -199,6 +223,9 @@ class Login(ctk.CTkFrame):
             pass
 
     def clear_login(self):
+        """
+        Clears the username and password entry fields if the "Remember Me" checkbox is not checked.
+        """
         checkbox_execute = self.checkbox_var.get()
 
         if not checkbox_execute:
@@ -206,8 +233,18 @@ class Login(ctk.CTkFrame):
             self.password_entry.delete(0, ctk.END)
 
     def save_user_id(self, user_id):
+        """
+        Saves the user ID obtained during the login process.
+
+        Parameters:
+        - user_id: The ID of the authenticated user.
+        """
         self.user_id = user_id
 
     def get_user_id(self):
+        """
+        Returns:
+        - The user ID of the authenticated user.
+        """
         return self.user_id
 
