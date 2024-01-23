@@ -152,34 +152,6 @@ class Storage(ctk.CTkFrame):
             account_names = db.storage_create_account_buttons(self.user_id)
 
 
-        # with sqlite3.connect(self.db_path) as connection:
-        #     connect = sqlite3.connect(self.db_path)
-        #     cursor = connect.cursor()
-
-
-
-
-        # cursor.execute('SELECT name FROM sqlite_master WHERE type="table" AND name="UserData"')
-        # table_exists = cursor.fetchone()
-
-        # if not table_exists:
-        #     cursor.execute('''
-        #         CREATE TABLE IF NOT EXISTS UserData (
-        #             entry_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        #             entry_name VARCHAR(256),
-        #             entry_username VARCHAR(256),
-        #             entry_password VARCHAR(256),
-        #             entry_website VARCHAR(256),
-        #             User_id INTEGER,
-        #             FOREIGN KEY (User_id) REFERENCES Users(id)
-        #         )
-        #     ''')
-
-        # cursor.execute("SELECT entry_name FROM UserData WHERE User_id=?", [self.user_id])
-        # account_names = cursor.fetchall()
-
-        # connection.close()
-
         self.destroy_account_buttons()
 
         for i, account_name in enumerate(account_names):
@@ -204,20 +176,6 @@ class Storage(ctk.CTkFrame):
         with DataBase() as db:
             account_details = db.storage_fetch_user_data(account_name, self.user_id)
 
-
-
-        # Fetch account details based on the provided account_name
-        # conn = sqlite3.connect(self.db_path)
-        # cursor = conn.cursor()
-        # query = (
-        #     "SELECT entry_id, entry_name, entry_username, entry_password, entry_website "
-        #     "FROM UserData WHERE entry_name=? AND User_id=?"
-        # )
-        # data = (account_name, self.user_id)
-
-        # cursor.execute(query, data)
-        # account_details = cursor.fetchone()
-        # conn.close()
 
         if account_details:
             self.current_id = account_details[0]
@@ -317,17 +275,9 @@ class Storage(ctk.CTkFrame):
 
 
 
-        # conn = sqlite3.connect(self.db_path)
-        # cursor = conn.cursor()
 
         if account_index is not None:
-            # query = (
-            #     "SELECT entry_name, entry_username, entry_password, entry_website "
-            #     "FROM UserData LIMIT 1 OFFSET ?"
-            # )
-            # data = (account_index,)
-            # cursor.execute(query, data)
-            # account_details = cursor.fetchone()
+
             with DataBase() as db:
                 account_details = db.storage_fetch_details(account_index)
                 print(f"Fetched details from database - {account_details}")
@@ -384,22 +334,11 @@ class Storage(ctk.CTkFrame):
         current_id = self.get_id_for_update(self.current_id)
 
         if current_id is not None:
-            # conn = sqlite3.connect(self.db_path)
-            # cursor = conn.cursor()
 
-
-            # query = (
-            #     "UPDATE UserData SET entry_name=?, entry_username=?, "
-            #     "entry_password=?, entry_website=? WHERE entry_id=?"
-            # )
             data = (name, username, password, website, current_id)
 
             with DataBase() as db:
                 db.storage_update_user_data(data)
-
-            # cursor.execute(query, data)
-            # conn.commit()
-            # conn.close()
 
             print("Details updated successfully.")
 
