@@ -10,7 +10,7 @@ ROOT = pathlib.Path(__file__).parent
 #   Database Variables
 # ================================
 
-DATABASE_NAME = "AcessControl.db"
+DATABASE_NAME = "DataBase.db"
 DATABASE_FOLDER = ROOT / "database"
 DATABASE_PATH = DATABASE_FOLDER / DATABASE_NAME
 
@@ -34,3 +34,10 @@ RESIZABLE_VALUE = (False, False)
 
 GREY = "1a1a1a"
 SIDEBAR_TEXT_COLOR = "#d6d6d6"
+
+# ================================
+#   Credentials Settings
+# ================================
+CREDENTIALS_NAME = "credentials.json"
+CREDENTIALS_FOLDER = ROOT / "credentials"
+CREDENTIALS_PATH = CREDENTIALS_FOLDER / CREDENTIALS_NAME
