@@ -24,7 +24,7 @@ import logging
 from pathlib import Path
 import constants as const
 
-logging.basicConfig(level=logging.DEBUG, filename=const.LOGGING_PATH,
+logging.basicConfig(level=logging.INFO, filename=const.LOGGING_PATH,
                     format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
@@ -99,3 +99,19 @@ class DataBase:
                 logger.info(f"Table Users was created inside: {self.name} at address {self.path}")
         except Exception as e:
             logger.error(f"An error occurred while setting up the database: {e}")
+
+    def register_check_username(self, username):
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT username FROM Users WHERE username=?", [username])
+
+        if cursor.fetchone() is not None:
+            user_exists = True
+        else:
+            user_exists = False
+        return user_exists
+    
+    def register_user(self, username, hashed_password):
+        cursor = self.connection.cursor()
+        cursor.execute("INSERT INTO Users (username, password) VALUES (?, ?)",
+                                    [username, hashed_password])
+

@@ -10,11 +10,17 @@ Classes:
     Register: A customtkinter frame for user registration.
 """
 
-import os
-import sqlite3
 import customtkinter as ctk
 import bcrypt
+import logging
+import constants as const
 from sidebar import SideBarFrame
+from database import DataBase
+
+
+logging.basicConfig(level=logging.INFO, filename=const.LOGGING_PATH,
+                    format="%(asctime)s - %(levelname)s - %(message)s")
+logger = logging.getLogger(__name__)
 
 class Register(ctk.CTkFrame):
     """
@@ -32,7 +38,7 @@ class Register(ctk.CTkFrame):
         - repeat_password (ctk.CTkEntry): Entry field for repeating the password.
         - checkbox (ctk.CTkCheckBox): Checkbox for toggling password visibility.
         - button_register (ctk.CTkButton): Button for initiating the registration process.
-        - error_label (ctk.CTkLabel): Label for displaying error messages during registration.
+        - verification_label (ctk.CTkLabel): Label for displaying error messages during registration.
 
     Methods:
         - button_register_event: Handles the registration process.
@@ -79,8 +85,8 @@ class Register(ctk.CTkFrame):
                                               command=self.button_register_event)
         self.button_register.grid(row=4, column=0, pady=6, padx=120, sticky="ew")
 
-        self.error_label = ctk.CTkLabel(self.register_form_frame, text="", fg_color="transparent")
-        self.error_label.grid(row=5, column=0, padx=80, sticky="ew")
+        self.verification_label = ctk.CTkLabel(self.register_form_frame, text="", fg_color="transparent")
+        self.verification_label.grid(row=5, column=0, padx=80, sticky="ew")
 
 
     def button_register_event(self):
@@ -99,50 +105,36 @@ class Register(ctk.CTkFrame):
             - This method assumes the existence of the "Users" table in the database.
             - Passwords are hashed using bcrypt before being stored in the database.
         """
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        database_folder = os.path.join(script_dir, "database")
-        os.makedirs(database_folder, exist_ok=True)
-        self.db_path = os.path.join(database_folder, "AccessControlDB.db")
-
-
-        with sqlite3.connect(self.db_path) as connection:
-            self.connect = connection
-            self.cursor = connection.cursor()
-
         username = self.username.get()
         password = self.password.get()
         repeat_password = self.repeat_password.get()
 
-
         try:
-            if not username or not password or not repeat_password:
-                self.error_label.configure(text="Please fill in all fields", fg_color="red")
+            if not all((username, password, repeat_password)):
+                self.verification_label.configure(text="Please fill in all fields", fg_color="red")
                 return
 
             if password != repeat_password:
-                self.error_label.configure(text="Passwords do not match", fg_color="red")
+                self.verification_label.configure(text="Passwords do not match", fg_color="red")
                 return
 
+            with DataBase() as db:
+                if db.register_check_username(username):
+                    self.verification_label.configure(text="Username already exists", fg_color="red")
+                else:
+                    encoded_password = password.encode("utf-8")
+                    hashed_password = bcrypt.hashpw(encoded_password, bcrypt.gensalt())
+                    
+                    db.register_user(username, hashed_password)
+                    
+                    self.verification_label.configure(text="Account has been created", fg_color="green")
+                    logger.info(f"A new user: {username} has signed up.")
 
-            self.cursor.execute("SELECT username FROM Users WHERE username=?", [username])
-            if self.cursor.fetchone() is not None:
-                self.error_label.configure(text="Username already exists", fg_color="red")
-                return
+        except Exception as e:
+            self.verification_label.configure(text="An error occurred during registration.", fg_color="red")
+            logger.error(f"An error occurred while setting up the database: {e}")
 
-            else:
-                encoded_password = password.encode("utf-8")
-                hashed_password = bcrypt.hashpw(encoded_password, bcrypt.gensalt())
-                self.cursor.execute("INSERT INTO Users (username, password) VALUES (?, ?)",
-                                    [username, hashed_password])
-
-                self.connect.commit()
-                self.error_label.configure(text="Account has been created", fg_color="green")
-
-        except sqlite3.Error as e:
-            print(f"SQLite Error: {e}")
-            self.error_label.configure(text="An error occurred during registration.",
-                                       fg_color="red")
-
+            
     def reveal_password(self):
         """
         Toggles the visibility of password entries based on the state of a checkbox.

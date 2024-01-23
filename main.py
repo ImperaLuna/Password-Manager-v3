@@ -15,8 +15,6 @@ Usage:
 """
 
 import customtkinter as ctk
-import os
-import sqlite3
 from login import Login
 from register import Register
 from storage import Storage
