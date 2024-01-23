@@ -25,7 +25,7 @@ from pathlib import Path
 import constants as const
 
 logging.basicConfig(level=logging.INFO, filename=const.LOGGING_PATH,
-                    format="%(asctime)s - %(levelname)s - %(message)s")
+                    format="%(asctime)s -  %(levelname)s - Module: %(module)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 class DataBase:
@@ -102,7 +102,7 @@ class DataBase:
 
     def register_check_username(self, username):
         cursor = self.connection.cursor()
-        cursor.execute("SELECT username FROM Users WHERE username=?", [username])
+        cursor.execute("SELECT username FROM Users WHERE username=?", (username,))
 
         if cursor.fetchone() is not None:
             user_exists = True
@@ -113,17 +113,17 @@ class DataBase:
     def register_user(self, username, hashed_password):
         cursor = self.connection.cursor()
         cursor.execute("INSERT INTO Users (username, password) VALUES (?, ?)",
-                                    [username, hashed_password])
+                                    (username, hashed_password))
         
     def login_check(self, username):
         cursor = self.connection.cursor()
-        cursor.execute("SELECT ID, Password FROM Users WHERE Username=?", [username,])
+        cursor.execute("SELECT ID, Password FROM Users WHERE Username=?", (username,))
         result = cursor.fetchone()
         return result
 
     def login_retrieve_encryption_key(self, username):
         cursor = self.connection.cursor()
-        cursor.execute("SELECT encryption_key FROM Users WHERE Username=?", [username])
+        cursor.execute("SELECT encryption_key FROM Users WHERE Username=?", (username,))
         db_encryption_key = cursor.fetchone()
         encryption_key = db_encryption_key[0]
         return encryption_key
@@ -131,12 +131,72 @@ class DataBase:
     def login_save_encryption_key(self, encryption_key, username):
         cursor = self.connection.cursor()
         cursor.execute("UPDATE Users SET Encryption_key=? WHERE Username=?",
-                        [encryption_key, username])
+                        (encryption_key, username))
         
-    def login_decrypt_password(self, username):
+    def generator_save_user_data(self, values):
         cursor = self.connection.cursor()
-        cursor.execute("SELECT encryption_key FROM Users WHERE Username=?", [username])
-        db_encryption_key = cursor.fetchone()
-        encryption_key = db_encryption_key[0]
-        return encryption_key
+        query = """
+            INSERT INTO UserData (entry_name, entry_username, entry_password, entry_website, User_id)
+            VALUES (?, ?, ?, ?, ?)
+        """
+        cursor.execute(query, values)
 
+    def storage_create_account_buttons(self, user_id):
+        cursor = self.connection.cursor()
+        cursor.execute('SELECT name FROM sqlite_master WHERE type="table" AND name="UserData"')
+        table_exists = cursor.fetchone()
+
+        if not table_exists:
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS UserData (
+                    entry_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    entry_name VARCHAR(256),
+                    entry_username VARCHAR(256),
+                    entry_password VARCHAR(256),
+                    entry_website VARCHAR(256),
+                    User_id INTEGER,
+                    FOREIGN KEY (User_id) REFERENCES Users(id)
+                )
+            ''')
+        cursor.execute("SELECT entry_name FROM UserData WHERE User_id=?", [user_id])
+        account_names = cursor.fetchall()
+        return account_names
+
+
+    def storage_fetch_user_data(self, account_name, user_id):
+        cursor = self.connection.cursor()
+        query = (
+            "SELECT entry_id, entry_name, entry_username, entry_password, entry_website "
+            "FROM UserData WHERE entry_name=? AND User_id=?"
+        )
+        data = (account_name, user_id)
+        cursor.execute(query, data)
+        account_details = cursor.fetchone()
+        return account_details
+
+    def storage_get_id_for_update(self, current_id):
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT entry_id FROM UserData WHERE entry_id=?", (current_id,))
+        result = cursor.fetchone()
+        return result
+
+    def storage_update_user_data(self, data):
+        cursor = self.connection.cursor()
+
+        query = (
+            "UPDATE UserData SET entry_name=?, entry_username=?, "
+            "entry_password=?, entry_website=? WHERE entry_id=?"
+        )
+        
+        cursor.execute(query, data)
+
+    def storage_fetch_details(self, account_index):
+        cursor = self.connection.cursor()
+        query = (
+            "SELECT entry_name, entry_username, entry_password, entry_website "
+            "FROM UserData LIMIT 1 OFFSET ?"
+        )
+        data = (account_index,)
+        cursor.execute(query, data)
+        account_details = cursor.fetchone()
+        return account_details

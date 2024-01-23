@@ -11,11 +11,10 @@ Usage:
 """
 
 import customtkinter as ctk
-import os
 import random
 import string
-import sqlite3
 import pyperclip
+from database import DataBase 
 
 class Generator(ctk.CTkToplevel):
     """
@@ -236,19 +235,7 @@ class EntryFrame(ctk.CTkToplevel):
         Parameters:
         - refresh_callback: Callback function to refresh the display.
         """
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        database_folder = os.path.join(script_dir, "database")
-        os.makedirs(database_folder, exist_ok=True)
-        self.db_path = os.path.join(database_folder, "AccessControlDB.db")
 
-
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
-
-        query = """
-            INSERT INTO UserData (entry_name, entry_username, entry_password, entry_website, User_id)
-            VALUES (?, ?, ?, ?, ?)
-        """
         values = (
             self.name_entry.get(),
             self.username_entry.get(),
@@ -257,10 +244,9 @@ class EntryFrame(ctk.CTkToplevel):
             self.user_id
         )
 
-
-        cursor.execute(query, values)
-        conn.commit()
-        conn.close()
+        with DataBase() as db:
+            db.generator_save_user_data(values)
 
         #calling create_account_buttons() from storage module to refresh the buttons
         refresh_callback()
+
