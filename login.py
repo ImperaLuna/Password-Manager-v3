@@ -22,7 +22,7 @@ import constants as const
 
 
 logging.basicConfig(level=logging.INFO, filename=const.LOGGING_PATH,
-                    format="%(asctime)s - %(levelname)s - %(message)s")
+                    format="%(asctime)s - Module: %(levelname)s - %(module)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 class Login(ctk.CTkFrame):
@@ -188,7 +188,7 @@ class Login(ctk.CTkFrame):
                                                 credentials.get("password", ""))
 
                 with DataBase() as db:
-                    encryption_key = db.login_decrypt_password()
+                    encryption_key = db.login_retrieve_encryption_key(username)
 
                 fernet = Fernet(encryption_key)
                 password = fernet.decrypt(encrypted_password.encode("utf-8")).decode("utf-8")

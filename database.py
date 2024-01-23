@@ -25,7 +25,7 @@ from pathlib import Path
 import constants as const
 
 logging.basicConfig(level=logging.INFO, filename=const.LOGGING_PATH,
-                    format="%(asctime)s - %(levelname)s - %(message)s")
+                    format="%(asctime)s -  %(levelname)s - Module: %(module)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 class DataBase:
@@ -102,7 +102,7 @@ class DataBase:
 
     def register_check_username(self, username):
         cursor = self.connection.cursor()
-        cursor.execute("SELECT username FROM Users WHERE username=?", [username])
+        cursor.execute("SELECT username FROM Users WHERE username=?", (username,))
 
         if cursor.fetchone() is not None:
             user_exists = True
@@ -113,17 +113,17 @@ class DataBase:
     def register_user(self, username, hashed_password):
         cursor = self.connection.cursor()
         cursor.execute("INSERT INTO Users (username, password) VALUES (?, ?)",
-                                    [username, hashed_password])
+                                    (username, hashed_password))
         
     def login_check(self, username):
         cursor = self.connection.cursor()
-        cursor.execute("SELECT ID, Password FROM Users WHERE Username=?", [username,])
+        cursor.execute("SELECT ID, Password FROM Users WHERE Username=?", (username,))
         result = cursor.fetchone()
         return result
 
     def login_retrieve_encryption_key(self, username):
         cursor = self.connection.cursor()
-        cursor.execute("SELECT encryption_key FROM Users WHERE Username=?", [username])
+        cursor.execute("SELECT encryption_key FROM Users WHERE Username=?", (username,))
         db_encryption_key = cursor.fetchone()
         encryption_key = db_encryption_key[0]
         return encryption_key
@@ -131,12 +131,6 @@ class DataBase:
     def login_save_encryption_key(self, encryption_key, username):
         cursor = self.connection.cursor()
         cursor.execute("UPDATE Users SET Encryption_key=? WHERE Username=?",
-                        [encryption_key, username])
-        
-    def login_decrypt_password(self, username):
-        cursor = self.connection.cursor()
-        cursor.execute("SELECT encryption_key FROM Users WHERE Username=?", [username])
-        db_encryption_key = cursor.fetchone()
-        encryption_key = db_encryption_key[0]
-        return encryption_key
+                        (encryption_key, username))
+    
 

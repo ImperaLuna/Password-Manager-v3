@@ -19,7 +19,7 @@ from database import DataBase
 
 
 logging.basicConfig(level=logging.INFO, filename=const.LOGGING_PATH,
-                    format="%(asctime)s - %(levelname)s - %(message)s")
+                    format="%(asctime)s -  %(levelname)s - Module: %(module)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 class Register(ctk.CTkFrame):
