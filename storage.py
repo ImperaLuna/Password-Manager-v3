@@ -29,12 +29,17 @@ Note:
     installed, and the necessary database and file structures are in place.
 """
 import customtkinter as ctk
-import os
 from sidebar import SideBarFrame
 from generator import Generator, EntryFrame
-import sqlite3
 import pyperclip
 import webbrowser
+import constants as const
+import logging
+from database import DataBase
+
+logging.basicConfig(level=logging.DEBUG, filename=const.LOGGING_PATH,
+                    format="%(asctime)s -  %(levelname)s - Module: %(module)s - %(message)s")
+logger = logging.getLogger(__name__)
 
 class Storage(ctk.CTkFrame):
     """
@@ -92,6 +97,7 @@ class Storage(ctk.CTkFrame):
         sidebar.label("Storage Module")
 
         self.user_id = user_id
+        self.db_path = const.DATABASE_PATH
 
 
         self.new_item = ctk.CTkButton(sidebar.frame, text="New Entry",
@@ -139,39 +145,40 @@ class Storage(ctk.CTkFrame):
         """
         Retrieves data and creates account entry buttons.
         """
-        print(f"The value inside Storage is: {self.user_id}")
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        database_folder = os.path.join(script_dir, "database")
-        os.makedirs(database_folder, exist_ok=True)
-        self.db_path = os.path.join(database_folder, "AccessControlDB.db")
 
-        with sqlite3.connect(self.db_path) as connection:
-            connect = sqlite3.connect(self.db_path)
-            cursor = connect.cursor()
+        logger.debug("The value inside Storage is: %s", self.user_id)
+
+        with DataBase() as db:
+            account_names = db.storage_create_account_buttons(self.user_id)
 
 
+        # with sqlite3.connect(self.db_path) as connection:
+        #     connect = sqlite3.connect(self.db_path)
+        #     cursor = connect.cursor()
 
 
-        cursor.execute('SELECT name FROM sqlite_master WHERE type="table" AND name="UserData"')
-        table_exists = cursor.fetchone()
 
-        if not table_exists:
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS UserData (
-                    entry_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    entry_name VARCHAR(256),
-                    entry_username VARCHAR(256),
-                    entry_password VARCHAR(256),
-                    entry_website VARCHAR(256),
-                    User_id INTEGER,
-                    FOREIGN KEY (User_id) REFERENCES Users(id)
-                )
-            ''')
 
-        cursor.execute("SELECT entry_name FROM UserData WHERE User_id=?", [self.user_id])
-        account_names = cursor.fetchall()
+        # cursor.execute('SELECT name FROM sqlite_master WHERE type="table" AND name="UserData"')
+        # table_exists = cursor.fetchone()
 
-        connection.close()
+        # if not table_exists:
+        #     cursor.execute('''
+        #         CREATE TABLE IF NOT EXISTS UserData (
+        #             entry_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        #             entry_name VARCHAR(256),
+        #             entry_username VARCHAR(256),
+        #             entry_password VARCHAR(256),
+        #             entry_website VARCHAR(256),
+        #             User_id INTEGER,
+        #             FOREIGN KEY (User_id) REFERENCES Users(id)
+        #         )
+        #     ''')
+
+        # cursor.execute("SELECT entry_name FROM UserData WHERE User_id=?", [self.user_id])
+        # account_names = cursor.fetchall()
+
+        # connection.close()
 
         self.destroy_account_buttons()
 
@@ -193,25 +200,24 @@ class Storage(ctk.CTkFrame):
         """
         # Destroy previous widgets in the details frame
         self.destroy_entry_widgets()
+        # Fetch account details based on the provided account_name
+        with DataBase() as db:
+            account_details = db.storage_fetch_user_data(account_name, self.user_id)
 
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        database_folder = os.path.join(script_dir, "database")
-        os.makedirs(database_folder, exist_ok=True)
-        self.db_path = os.path.join(database_folder, "AccessControlDB.db")
 
 
         # Fetch account details based on the provided account_name
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
-        query = (
-            "SELECT entry_id, entry_name, entry_username, entry_password, entry_website "
-            "FROM UserData WHERE entry_name=? AND User_id=?"
-        )
-        data = (account_name, self.user_id)
+        # conn = sqlite3.connect(self.db_path)
+        # cursor = conn.cursor()
+        # query = (
+        #     "SELECT entry_id, entry_name, entry_username, entry_password, entry_website "
+        #     "FROM UserData WHERE entry_name=? AND User_id=?"
+        # )
+        # data = (account_name, self.user_id)
 
-        cursor.execute(query, data)
-        account_details = cursor.fetchone()
-        conn.close()
+        # cursor.execute(query, data)
+        # account_details = cursor.fetchone()
+        # conn.close()
 
         if account_details:
             self.current_id = account_details[0]
@@ -309,25 +315,22 @@ class Storage(ctk.CTkFrame):
             - account_index: The index of the selected user entry.
         """
 
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        database_folder = os.path.join(script_dir, "database")
-        os.makedirs(database_folder, exist_ok=True)
-        self.db_path = os.path.join(database_folder, "AccessControlDB.db")
 
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
+
+        # conn = sqlite3.connect(self.db_path)
+        # cursor = conn.cursor()
 
         if account_index is not None:
-            query = (
-                "SELECT entry_name, entry_username, entry_password, entry_website "
-                "FROM UserData LIMIT 1 OFFSET ?"
-            )
-            data = (account_index,)
-            cursor.execute(query, data)
-            account_details = cursor.fetchone()
-
-
-            print(f"Fetched details from database - {account_details}")
+            # query = (
+            #     "SELECT entry_name, entry_username, entry_password, entry_website "
+            #     "FROM UserData LIMIT 1 OFFSET ?"
+            # )
+            # data = (account_index,)
+            # cursor.execute(query, data)
+            # account_details = cursor.fetchone()
+            with DataBase() as db:
+                account_details = db.storage_fetch_details(account_index)
+                print(f"Fetched details from database - {account_details}")
 
             if account_details:
                 self.create_entry_fields_and_buttons()
@@ -349,7 +352,7 @@ class Storage(ctk.CTkFrame):
             else:
                 print("No account details found for the selected account index.")
 
-        conn.close()
+        # conn.close()
 
     def get_id_for_update(self, current_id):
         """
@@ -358,27 +361,16 @@ class Storage(ctk.CTkFrame):
         Parameters:
             - current_id: The current database entry ID.
         """
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        database_folder = os.path.join(script_dir, "database")
-        os.makedirs(database_folder, exist_ok=True)
-        self.db_path = os.path.join(database_folder, "AccessControlDB.db")
 
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
 
-        cursor.execute("SELECT entry_id FROM UserData WHERE entry_id=?", (current_id,))
-        result = cursor.fetchone()
-
-        # Print statements for debugging
-        print(f"Current ID: {current_id}")
-        print(f"SQL Query result: {result}")
-
-        conn.close()
+        with DataBase() as db:
+            result = db.storage_get_id_for_update
 
         if result:
             return result[0]  # Return the id
         else:
             return None
+
 
     def update_details(self):
         """
@@ -392,24 +384,22 @@ class Storage(ctk.CTkFrame):
         current_id = self.get_id_for_update(self.current_id)
 
         if current_id is not None:
-            script_dir = os.path.dirname(os.path.abspath(__file__))
-            database_folder = os.path.join(script_dir, "database")
-            os.makedirs(database_folder, exist_ok=True)
-            self.db_path = os.path.join(database_folder, "AccessControlDB.db")
-
-            conn = sqlite3.connect(self.db_path)
-            cursor = conn.cursor()
+            # conn = sqlite3.connect(self.db_path)
+            # cursor = conn.cursor()
 
 
-            query = (
-                "UPDATE UserData SET entry_name=?, entry_username=?, "
-                "entry_password=?, entry_website=? WHERE entry_id=?"
-            )
+            # query = (
+            #     "UPDATE UserData SET entry_name=?, entry_username=?, "
+            #     "entry_password=?, entry_website=? WHERE entry_id=?"
+            # )
             data = (name, username, password, website, current_id)
 
-            cursor.execute(query, data)
-            conn.commit()
-            conn.close()
+            with DataBase() as db:
+                db.storage_update_user_data(data)
+
+            # cursor.execute(query, data)
+            # conn.commit()
+            # conn.close()
 
             print("Details updated successfully.")
 
