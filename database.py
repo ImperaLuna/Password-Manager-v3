@@ -200,3 +200,10 @@ class DataBase:
         cursor.execute(query, data)
         account_details = cursor.fetchone()
         return account_details
+    
+    def storage_delete_details(self, entry_id):
+        print(f"Deleting entry with entry_id: {entry_id}")
+        cursor = self.connection.cursor()
+        cursor.execute("DELETE FROM UserData WHERE entry_id = ?", (entry_id,))
+
+
