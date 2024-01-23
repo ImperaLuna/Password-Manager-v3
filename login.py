@@ -10,13 +10,20 @@ Classes:
     Login: A customtkinter frame for Login logic.
 """
 
-import sqlite3
+
 import bcrypt
-import os
 import customtkinter as ctk
 from sidebar import SideBarFrame
 import json
+import logging
 from cryptography.fernet import Fernet
+from database import DataBase
+import constants as const
+
+
+logging.basicConfig(level=logging.INFO, filename=const.LOGGING_PATH,
+                    format="%(asctime)s - %(levelname)s - %(message)s")
+logger = logging.getLogger(__name__)
 
 class Login(ctk.CTkFrame):
     """
@@ -62,11 +69,7 @@ class Login(ctk.CTkFrame):
         sidebar.label("Login")
 
         self.user_id = None
-
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        database_folder = os.path.join(script_dir, "database")
-        self.db_path = os.path.join(database_folder, "AccessControlDB.db")
-
+        
         self.login_frame = ctk.CTkFrame(self, fg_color="transparent")
         self.login_frame.grid(row=1, column=1, padx=(20, 20), pady=(20, 20), sticky="nsw")
         self.login_frame.grid_columnconfigure(0, weight=0)
@@ -94,9 +97,9 @@ class Login(ctk.CTkFrame):
                                 command=lambda: controller.show_frame("Register"))
         self.register_button.grid(row=5, column=0, pady=6, padx=50, sticky="ew")
 
-        self.error_label = ctk.CTkLabel(self.login_frame, text="",
+        self.verification_label = ctk.CTkLabel(self.login_frame, text="",
                                          fg_color="transparent")
-        self.error_label.grid(row=6, column=0, padx=12, sticky="ew")
+        self.verification_label.grid(row=6, column=0, padx=12, sticky="ew")
 
 
     def login(self, controller, storage_class):
@@ -107,8 +110,6 @@ class Login(ctk.CTkFrame):
         - controller: An instance of the application controller used for frame switching.
         - storage_class: The class representing the storage frame in the application.
         """
-        connect = sqlite3.connect(self.db_path)
-        cursor = connect.cursor()
 
         checkbox_execute = self.checkbox_var.get()
         username = self.username_entry.get()
@@ -116,13 +117,12 @@ class Login(ctk.CTkFrame):
 
         try:
             if not username or not password:
-                self.error_label.configure(text="Please enter username and password",
+                self.verification_label.configure(text="Please enter username and password",
                                             fg_color="red")
                 return
 
-            cursor.execute("SELECT ID, Password FROM Users WHERE Username=?", [username,])
-            result = cursor.fetchone()
-
+            with DataBase() as db: 
+                result = db.login_check(username)
             if result:
                 user_id, hashed_password = result
                 if bcrypt.checkpw(password.encode("utf-8"), hashed_password):
@@ -135,15 +135,13 @@ class Login(ctk.CTkFrame):
                     else:
                         self.delete_credentials()
                         self.clear_login()
-
                 else:
-                    self.error_label.configure(text="Invalid password", fg_color="red")
+                    self.verification_label.configure(text="Invalid password", fg_color="red")
             else:
-                self.error_label.configure(text="Invalid username", fg_color="red")
-        except sqlite3.Error as e:
-            print(f"SQLite error: {e}")
-        finally:
-            connect.close()
+                self.verification_label.configure(text="Invalid username", fg_color="red")
+        except Exception as e:
+            self.verification_label.configure(text="An error occurred during registration.", fg_color="red")
+            logger.error(f"An error occurred while setting up the database: {e}")
 
     def save_credentials(self, username, password):
         """
@@ -155,28 +153,23 @@ class Login(ctk.CTkFrame):
         - username: The username to be saved.
         - password: The password to be saved.
         """
-        connect = sqlite3.connect(self.db_path)
-        cursor = connect.cursor()
-
-
-        cursor.execute("SELECT encryption_key FROM Users WHERE Username=?", [username])
-        db_encryption_key = cursor.fetchone()
-        encryption_key = db_encryption_key[0]
+        with DataBase() as db:
+            encryption_key = db.login_retrieve_encryption_key(username)
 
         if not encryption_key:
             encryption_key = Fernet.generate_key()
-            cursor.execute("UPDATE Users SET Encryption_key=? WHERE Username=?",
-                        [encryption_key, username])
-            connect.commit()
+
+            with DataBase() as db:
+                db.login_save_encryption_key(encryption_key, username)
 
         fernet = Fernet(encryption_key)
         encrypted_password = fernet.encrypt(password.encode("utf-8")).decode("utf-8")
 
 
         credentials = {"username": username, "password": encrypted_password}
-        db_folder = os.path.dirname(self.db_path)
-        credentials_path = os.path.join(db_folder, "credentials.json")
-        with open(credentials_path, "w", encoding="utf-8") as f:
+        
+        const.CREDENTIALS_FOLDER.mkdir(exist_ok=True)
+        with open(const.CREDENTIALS_PATH, "w", encoding="utf-8") as f:
             json.dump(credentials, f)
 
     def check_credentials_file(self):
@@ -185,20 +178,17 @@ class Login(ctk.CTkFrame):
         decrypts the password, and populates the username and password entry fields accordingly.
         Also sets the "Remember Me" checkbox if credentials are loaded successfully.
         """
-        connect = sqlite3.connect(self.db_path)
-        cursor = connect.cursor()
+
 
         try:
-            db_folder = os.path.dirname(self.db_path)
-            credentials_path = os.path.join(db_folder, "credentials.json")
-            with open(credentials_path, "r", encoding="utf-8") as f:
+
+            with open(const.CREDENTIALS_PATH, "r", encoding="utf-8") as f:
                 credentials = json.load(f)
                 username, encrypted_password = (credentials.get("username", ""),
                                                 credentials.get("password", ""))
 
-                cursor.execute("SELECT encryption_key FROM Users WHERE Username=?", [username])
-                db_encryption_key = cursor.fetchone()
-                encryption_key = db_encryption_key[0]
+                with DataBase() as db:
+                    encryption_key = db.login_decrypt_password()
 
                 fernet = Fernet(encryption_key)
                 password = fernet.decrypt(encrypted_password.encode("utf-8")).decode("utf-8")
@@ -215,10 +205,9 @@ class Login(ctk.CTkFrame):
         """
         Deletes the stored credentials file if it exists.
         """
-        db_folder = os.path.dirname(self.db_path)
-        db_credentials_path = os.path.join(db_folder, "credentials.json")
         try:
-            os.remove(db_credentials_path)
+            const.CREDENTIALS_PATH.unlink()
+            const.CREDENTIALS_FOLDER.rmdir()
         except FileNotFoundError:
             pass
 

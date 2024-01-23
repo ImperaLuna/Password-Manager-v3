@@ -20,7 +20,7 @@ class SideBarFrame(ctk.CTkFrame):
     Attributes:
     - parent: The parent widget for this frame.
     - appearance_mode_label: Label displaying the "Appearance Mode" text in the sidebar.
-    - appearance_mode_optionemenu: OptionMenu widget for selecting appearance modes.
+    - appearance_mode_optionmenu: OptionMenu widget for selecting appearance modes.
     - logo_label: Label for displaying labeled sections in the sidebar.
 
     Methods:
@@ -47,10 +47,10 @@ class SideBarFrame(ctk.CTkFrame):
         self.appearance_mode_label = ctk.CTkLabel(self.frame, text='Appearance Mode:', anchor='sw')
         self.appearance_mode_label.grid(row=6, column=0, padx=40, pady=(0, 10), sticky='sw')
 
-        self.appearance_mode_optionemenu = ctk.CTkOptionMenu(self.frame,
+        self.appearance_mode_optionmenu = ctk.CTkOptionMenu(self.frame,
                                                             values=['System', 'Light', 'Dark'],
                                                         command=self.change_appearance_mode_event)
-        self.appearance_mode_optionemenu.grid(row=7, column=0, padx=40, pady=(0, 40), sticky='sw')
+        self.appearance_mode_optionmenu.grid(row=7, column=0, padx=40, pady=(0, 40), sticky='sw')
 
 
     def change_appearance_mode_event(self, new_appearance_mode: str):

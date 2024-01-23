@@ -114,4 +114,29 @@ class DataBase:
         cursor = self.connection.cursor()
         cursor.execute("INSERT INTO Users (username, password) VALUES (?, ?)",
                                     [username, hashed_password])
+        
+    def login_check(self, username):
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT ID, Password FROM Users WHERE Username=?", [username,])
+        result = cursor.fetchone()
+        return result
+
+    def login_retrieve_encryption_key(self, username):
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT encryption_key FROM Users WHERE Username=?", [username])
+        db_encryption_key = cursor.fetchone()
+        encryption_key = db_encryption_key[0]
+        return encryption_key
+
+    def login_save_encryption_key(self, encryption_key, username):
+        cursor = self.connection.cursor()
+        cursor.execute("UPDATE Users SET Encryption_key=? WHERE Username=?",
+                        [encryption_key, username])
+        
+    def login_decrypt_password(self, username):
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT encryption_key FROM Users WHERE Username=?", [username])
+        db_encryption_key = cursor.fetchone()
+        encryption_key = db_encryption_key[0]
+        return encryption_key
 
