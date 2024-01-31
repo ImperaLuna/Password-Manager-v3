@@ -122,6 +122,9 @@ class Storage(ctk.CTkFrame):
         self.details_frame.grid(row=0, column=2, padx=20, pady=20, sticky="nsew")
 
     def log_out_button_press(self, controller):
+        """
+        Deletes all the buttons when the logout button is pressed
+        """
         self.destroy_entry_widgets()
         controller.show_frame("Login")
         
@@ -182,7 +185,6 @@ class Storage(ctk.CTkFrame):
 
         if account_details:
             self.current_id = account_details[0]
-            print(self.current_id)
 
             self.name_entry = ctk.CTkEntry(self.details_frame)
             self.name_entry.grid(row=0, column=1, padx=10, pady=10, sticky="e")
@@ -244,7 +246,6 @@ class Storage(ctk.CTkFrame):
         Parameters:
             - account_index: The index of the selected user entry.
         """
-        print("Show details called")
         self.create_entry_fields_and_buttons()
         self.fetch_and_display_details(account_index)
 
@@ -305,7 +306,7 @@ class Storage(ctk.CTkFrame):
                 self.entry_widgets["website"].delete(0, "end")
                 self.entry_widgets["website"].insert(0, website)
             else:
-                print("No account details found for the selected account index.")
+                logger.error("No account details found for the selected account index")
 
 
 
@@ -324,13 +325,14 @@ class Storage(ctk.CTkFrame):
 
             with DataBase() as db:
                 db.storage_update_user_data(data)
+                logger.info("Details updated successfully to the db.")
 
-            print("Details updated successfully.")
 
             self.create_account_buttons()
 
         else:
-            print("Record not found for the given ID.")
+            logger.error("Record not found for the given ID.")
+
 
     def delete_details(self):
 
@@ -346,7 +348,6 @@ class Storage(ctk.CTkFrame):
         Copies the username to the clipboard.
         """
         username = self.username_entry.get()
-        print(f"{username}")
         pyperclip.copy(username)
 
     def copy_password(self):
