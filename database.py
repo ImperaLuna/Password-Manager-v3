@@ -101,6 +101,15 @@ class DataBase:
             logger.error(f"An error occurred while setting up the database: {e}")
 
     def register_check_username(self, username):
+        """
+        Checks if a given username exists in the database.
+
+        Parameters:
+            username (str): Username to check for existence.
+
+        Returns:
+            bool: True if the username exists, False otherwise.
+        """
         cursor = self.connection.cursor()
         cursor.execute("SELECT username FROM Users WHERE username=?", (username,))
 
@@ -111,17 +120,42 @@ class DataBase:
         return user_exists
     
     def register_user(self, username, hashed_password):
+        """
+        Registers a new user with a username and hashed password.
+
+        Parameters:
+            username (str): Username of the new user.
+            hashed_password (str): Hashed password of the new user.
+        """
         cursor = self.connection.cursor()
         cursor.execute("INSERT INTO Users (username, password) VALUES (?, ?)",
                                     (username, hashed_password))
         
     def login_check(self, username):
+        """
+        Checks if a given username exists in the database and retrieves the user's ID and hashed password.
+
+        Parameters:
+            username (str): Username to check.
+
+        Returns:
+            tuple: Tuple containing user's ID and hashed password if the username exists, else None.
+        """
         cursor = self.connection.cursor()
         cursor.execute("SELECT ID, Password FROM Users WHERE Username=?", (username,))
         result = cursor.fetchone()
         return result
 
     def login_retrieve_encryption_key(self, username):
+        """
+        Retrieves the encryption key associated with a given username.
+
+        Parameters:
+            username (str): Username to retrieve the encryption key for.
+
+        Returns:
+            str: Encryption key associated with the username.
+        """
         cursor = self.connection.cursor()
         cursor.execute("SELECT encryption_key FROM Users WHERE Username=?", (username,))
         db_encryption_key = cursor.fetchone()
@@ -129,11 +163,24 @@ class DataBase:
         return encryption_key
 
     def login_save_encryption_key(self, encryption_key, username):
+        """
+        Saves the encryption key associated with a username in the database.
+
+        Parameters:
+            encryption_key (str): Encryption key to save.
+            username (str): Username to associate with the encryption key.
+        """
         cursor = self.connection.cursor()
         cursor.execute("UPDATE Users SET Encryption_key=? WHERE Username=?",
                         (encryption_key, username))
         
     def generator_save_user_data(self, values):
+        """
+        Saves user data into the UserData table.
+
+        Parameters:
+            values (tuple): Tuple containing entry name, username, password, website, and user ID.
+        """
         cursor = self.connection.cursor()
         query = """
             INSERT INTO UserData (entry_name, entry_username, entry_password, entry_website, User_id)
@@ -142,6 +189,15 @@ class DataBase:
         cursor.execute(query, values)
 
     def storage_create_account_buttons(self, user_id):
+        """
+        Creates the UserData table if it doesn't exist and retrieves account names associated with a user ID.
+
+        Parameters:
+            user_id (int): ID of the user.
+
+        Returns:
+            list: List of account names associated with the user ID.
+        """
         cursor = self.connection.cursor()
         cursor.execute('SELECT name FROM sqlite_master WHERE type="table" AND name="UserData"')
         table_exists = cursor.fetchone()
@@ -164,6 +220,16 @@ class DataBase:
 
 
     def storage_fetch_user_data(self, account_name, user_id):
+        """
+        Fetches user data for a specific account name and user ID.
+
+        Parameters:
+            account_name (str): Name of the account to fetch data for.
+            user_id (int): ID of the user.
+
+        Returns:
+            tuple: Tuple containing entry ID, name, username, password, and website of the account.
+        """
         cursor = self.connection.cursor()
         query = (
             "SELECT entry_id, entry_name, entry_username, entry_password, entry_website "
@@ -176,6 +242,12 @@ class DataBase:
 
 
     def storage_update_user_data(self, data):
+        """
+        Updates user data in the UserData table.
+
+        Parameters:
+            data (tuple): Tuple containing entry name, username, password, website, and entry ID.
+        """
         cursor = self.connection.cursor()
 
         query = (
@@ -186,6 +258,15 @@ class DataBase:
         cursor.execute(query, data)
 
     def storage_fetch_details(self, account_index):
+        """
+        Fetches user data for a specific account index.
+
+        Parameters:
+            account_index (int): Index of the account to fetch data for.
+
+        Returns:
+            tuple: Tuple containing entry name, username, password, and website.
+        """
         cursor = self.connection.cursor()
         query = (
             "SELECT entry_name, entry_username, entry_password, entry_website "
@@ -197,6 +278,12 @@ class DataBase:
         return account_details
     
     def storage_delete_details(self, entry_id):
+        """
+        Deletes user data for a specific entry ID.
+
+        Parameters:
+            entry_id (int): ID of the entry to delete.
+        """
         cursor = self.connection.cursor()
         cursor.execute("DELETE FROM UserData WHERE entry_id = ?", (entry_id,))
 
