@@ -281,9 +281,6 @@ class Storage(ctk.CTkFrame):
             - account_index: The index of the selected user entry.
         """
 
-
-
-
         if account_index is not None:
 
             with DataBase() as db:
@@ -310,24 +307,6 @@ class Storage(ctk.CTkFrame):
             else:
                 print("No account details found for the selected account index.")
 
-        # conn.close()
-
-    def get_id_for_update(self, current_id):
-        """
-        Retrieves the database ID for updating details.
-
-        Parameters:
-            - current_id: The current database entry ID.
-        """
-
-
-        with DataBase() as db:
-            result = db.storage_get_id_for_update(current_id)
-
-        if result:
-            return result[0]  # Return the id
-        else:
-            return None
 
 
     def update_details(self):
@@ -339,11 +318,9 @@ class Storage(ctk.CTkFrame):
         password = self.password_entry.get()
         website = self.website_entry.get()
 
-        current_id = self.get_id_for_update(self.current_id)
+        if self.current_id is not None:
 
-        if current_id is not None:
-
-            data = (name, username, password, website, current_id)
+            data = (name, username, password, website, self.current_id)
 
             with DataBase() as db:
                 db.storage_update_user_data(data)
@@ -356,13 +333,13 @@ class Storage(ctk.CTkFrame):
             print("Record not found for the given ID.")
 
     def delete_details(self):
-        current_id = self.get_id_for_update(self.current_id)
 
-        with DataBase() as db:
-            db.storage_delete_details(current_id)
-        
-        self.create_account_buttons()
-        self.destroy_entry_widgets()
+        if self.current_id is not None:
+            with DataBase() as db:
+                db.storage_delete_details(self.current_id)
+            self.create_account_buttons()
+            self.destroy_entry_widgets()
+
 
     def copy_username(self):
         """

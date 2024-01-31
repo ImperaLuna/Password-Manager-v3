@@ -174,11 +174,6 @@ class DataBase:
         account_details = cursor.fetchone()
         return account_details
 
-    def storage_get_id_for_update(self, current_id):
-        cursor = self.connection.cursor()
-        cursor.execute("SELECT entry_id FROM UserData WHERE entry_id=?", (current_id,))
-        result = cursor.fetchone()
-        return result
 
     def storage_update_user_data(self, data):
         cursor = self.connection.cursor()
@@ -202,7 +197,6 @@ class DataBase:
         return account_details
     
     def storage_delete_details(self, entry_id):
-        print(f"Deleting entry with entry_id: {entry_id}")
         cursor = self.connection.cursor()
         cursor.execute("DELETE FROM UserData WHERE entry_id = ?", (entry_id,))
 
