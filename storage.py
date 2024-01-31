@@ -361,7 +361,7 @@ class Storage(ctk.CTkFrame):
         """
         Opens the website associated with the selected account.
         """
-        website = self.entry_widgets["website"].get()
+        website = self.website_entry.get()
         webbrowser.open(website)
 
     def open_new_entry_frame(self):
