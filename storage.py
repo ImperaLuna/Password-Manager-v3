@@ -111,7 +111,7 @@ class Storage(ctk.CTkFrame):
         self.toplevel_window = None
 
         self.log_out = ctk.CTkButton(sidebar.frame, text="Log Out",
-                                        command=lambda: controller.show_frame("Login"))
+                                        command=lambda: self.log_out_button_press(controller))
         self.log_out.grid(row=5, column=0, padx=20, pady=10)
 
         self.scrollable_frame = ctk.CTkScrollableFrame(self, label_text="Accounts")
@@ -121,7 +121,13 @@ class Storage(ctk.CTkFrame):
         self.details_frame = ctk.CTkFrame(self, width=400, height=500)
         self.details_frame.grid(row=0, column=2, padx=20, pady=20, sticky="nsew")
 
-
+    def log_out_button_press(self, controller):
+        """
+        Deletes all the buttons when the logout button is pressed
+        """
+        self.destroy_entry_widgets()
+        controller.show_frame("Login")
+        
 
     def open_toplevel(self):
         """
@@ -179,7 +185,6 @@ class Storage(ctk.CTkFrame):
 
         if account_details:
             self.current_id = account_details[0]
-            print(self.current_id)
 
             self.name_entry = ctk.CTkEntry(self.details_frame)
             self.name_entry.grid(row=0, column=1, padx=10, pady=10, sticky="e")
@@ -200,6 +205,11 @@ class Storage(ctk.CTkFrame):
             self.save_button = ctk.CTkButton(self.details_frame, text="Save",
                                             command=self.update_details)
             self.save_button.grid(row=4, column=0, columnspan=2, pady=10)
+
+            self.delete_button = ctk.CTkButton(self.details_frame, text="Delete",
+                                            command=self.delete_details)
+            self.delete_button.grid(row=6, column=0, columnspan=2, pady=10)
+
 
             self.copy_username_button = ctk.CTkButton(self.details_frame, text="Copy Username",
                                                     command=self.copy_username)
@@ -236,7 +246,6 @@ class Storage(ctk.CTkFrame):
         Parameters:
             - account_index: The index of the selected user entry.
         """
-        print("Show details called")
         self.create_entry_fields_and_buttons()
         self.fetch_and_display_details(account_index)
 
@@ -273,9 +282,6 @@ class Storage(ctk.CTkFrame):
             - account_index: The index of the selected user entry.
         """
 
-
-
-
         if account_index is not None:
 
             with DataBase() as db:
@@ -300,26 +306,8 @@ class Storage(ctk.CTkFrame):
                 self.entry_widgets["website"].delete(0, "end")
                 self.entry_widgets["website"].insert(0, website)
             else:
-                print("No account details found for the selected account index.")
+                logger.error("No account details found for the selected account index")
 
-        # conn.close()
-
-    def get_id_for_update(self, current_id):
-        """
-        Retrieves the database ID for updating details.
-
-        Parameters:
-            - current_id: The current database entry ID.
-        """
-
-
-        with DataBase() as db:
-            result = db.storage_get_id_for_update
-
-        if result:
-            return result[0]  # Return the id
-        else:
-            return None
 
 
     def update_details(self):
@@ -331,28 +319,35 @@ class Storage(ctk.CTkFrame):
         password = self.password_entry.get()
         website = self.website_entry.get()
 
-        current_id = self.get_id_for_update(self.current_id)
+        if self.current_id is not None:
 
-        if current_id is not None:
-
-            data = (name, username, password, website, current_id)
+            data = (name, username, password, website, self.current_id)
 
             with DataBase() as db:
                 db.storage_update_user_data(data)
+                logger.info("Details updated successfully to the db.")
 
-            print("Details updated successfully.")
 
             self.create_account_buttons()
 
         else:
-            print("Record not found for the given ID.")
+            logger.error("Record not found for the given ID.")
+
+
+    def delete_details(self):
+
+        if self.current_id is not None:
+            with DataBase() as db:
+                db.storage_delete_details(self.current_id)
+            self.create_account_buttons()
+            self.destroy_entry_widgets()
+
 
     def copy_username(self):
         """
         Copies the username to the clipboard.
         """
         username = self.username_entry.get()
-        print(f"{username}")
         pyperclip.copy(username)
 
     def copy_password(self):

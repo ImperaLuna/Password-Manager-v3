@@ -19,6 +19,7 @@ from login import Login
 from register import Register
 from storage import Storage
 from database import DataBase
+import constants as const
 
 ctk.set_appearance_mode("system")
 ctk.set_default_color_theme("blue")
@@ -50,7 +51,7 @@ class MainApp(ctk.CTk):
         with DataBase() as db:
             pass
 
-        self.title("Password Manager")
+        self.title(const.APP_NAME)
         self.geometry("960x540")
         self.resizable(False, False)
 

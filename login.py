@@ -60,7 +60,7 @@ class Login(ctk.CTkFrame):
 
         - get_user_id(self):
             Retrieves the user ID associated with the authenticated user.
-"""
+    """
     def __init__(self, parent, controller, user_id):
         ctk.CTkFrame.__init__(self, parent)
 
