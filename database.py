@@ -120,17 +120,18 @@ class DataBase:
             user_exists = False
         return user_exists
     
-    def register_user(self, username, hashed_password):
+    def register_user(self, username, hashed_password, encryption_key):
         """
         Registers a new user with a username and hashed password.
 
         Parameters:
             username (str): Username of the new user.
-            hashed_password (str): Hashed password of the new user.
+            hashed_password (bytes): Hashed password of the new user.
+            encryption_key(bytes): Encryption key of the new user
         """
         cursor = self.connection.cursor()
-        cursor.execute("INSERT INTO Users (username, password) VALUES (?, ?)",
-                                    (username, hashed_password))
+        cursor.execute("INSERT INTO Users (username, password, encryption_key) VALUES (?, ?, ?)",
+                                    (username, hashed_password, encryption_key))
         
     def login_check(self, username):
         """
@@ -163,17 +164,6 @@ class DataBase:
         encryption_key = db_encryption_key[0]
         return encryption_key
 
-    def login_save_encryption_key(self, encryption_key, username):
-        """
-        Saves the encryption key associated with a username in the database.
-
-        Parameters:
-            encryption_key (str): Encryption key to save.
-            username (str): Username to associate with the encryption key.
-        """
-        cursor = self.connection.cursor()
-        cursor.execute("UPDATE Users SET Encryption_key=? WHERE Username=?",
-                        (encryption_key, username))
         
     def generator_save_user_data(self, values):
         """
@@ -188,6 +178,21 @@ class DataBase:
             VALUES (?, ?, ?, ?, ?)
         """
         cursor.execute(query, values)
+
+    def storage_retrieve_encryption_key(self, id):
+        """
+        Retrieves the encryption key associated with a given username.
+
+        Parameters:
+            id (str): id to retrieve the encryption key for.
+
+        Returns:
+            blob: Encryption key associated with the username.
+        """
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT encryption_key FROM Users WHERE id=?", (id,))
+        encryption_key = cursor.fetchone()
+        return encryption_key
 
     def storage_create_account_buttons(self, user_id):
         """
@@ -211,6 +216,7 @@ class DataBase:
                     entry_username VARCHAR(256),
                     entry_password VARCHAR(256),
                     entry_website VARCHAR(256),
+                    iv BLOB,
                     User_id INTEGER,
                     FOREIGN KEY (User_id) REFERENCES Users(id)
                 )
@@ -233,14 +239,13 @@ class DataBase:
         """
         cursor = self.connection.cursor()
         query = (
-            "SELECT entry_id, entry_name, entry_username, entry_password, entry_website "
+            "SELECT entry_id, entry_name, entry_username, entry_password, entry_website, iv "
             "FROM UserData WHERE entry_name=? AND User_id=?"
         )
         data = (account_name, user_id)
         cursor.execute(query, data)
         account_details = cursor.fetchone()
         return account_details
-
 
     def storage_update_user_data(self, data):
         """
@@ -253,9 +258,8 @@ class DataBase:
 
         query = (
             "UPDATE UserData SET entry_name=?, entry_username=?, "
-            "entry_password=?, entry_website=? WHERE entry_id=?"
+            "entry_password=?, entry_website=?, iv=? WHERE entry_id=?"
         )
-        
         cursor.execute(query, data)
 
     def storage_fetch_details(self, account_index):
@@ -270,7 +274,7 @@ class DataBase:
         """
         cursor = self.connection.cursor()
         query = (
-            "SELECT entry_name, entry_username, entry_password, entry_website "
+            "SELECT entry_name, entry_username, entry_password, entry_website, iv "
             "FROM UserData LIMIT 1 OFFSET ?"
         )
         data = (account_index,)

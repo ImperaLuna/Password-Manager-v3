@@ -16,8 +16,8 @@ import customtkinter as ctk
 from sidebar import SideBarFrame
 import json
 import logging
-from cryptography.fernet import Fernet
 from database import DataBase
+from encryption import EncryptionManager
 import constants as const
 
 
@@ -76,11 +76,11 @@ class Login(ctk.CTkFrame):
         self.login_frame.grid_rowconfigure((0, 1, 2, 3, 4), weight=0)
 
         self.username_entry = ctk.CTkEntry(master=self.login_frame,
-                                        placeholder_text="Username")
+                                           placeholder_text="Username")
         self.username_entry.grid(row=0, column=0, pady=12, padx=10, sticky="ew")
 
         self.password_entry = ctk.CTkEntry(master=self.login_frame,
-                                        placeholder_text="Password", show="*")
+                                           placeholder_text="Password", show="*")
         self.password_entry.grid(row=1, column=0, pady=12, padx=10, sticky="ew")
 
         self.checkbox_var = ctk.BooleanVar()
@@ -90,17 +90,16 @@ class Login(ctk.CTkFrame):
         self.check_credentials_file()
 
         self.login_button = ctk.CTkButton(master=self.login_frame, text="Login",
-                                command=lambda: self.login(controller, "Storage"))
+                                          command=lambda: self.login(controller, "Storage"))
         self.login_button.grid(row=3, column=0, pady=6, padx=50, sticky="ew")
 
         self.register_button = ctk.CTkButton(master=self.login_frame, text="Register",
-                                command=lambda: controller.show_frame("Register"))
+                                             command=lambda: controller.show_frame("Register"))
         self.register_button.grid(row=5, column=0, pady=6, padx=50, sticky="ew")
 
         self.verification_label = ctk.CTkLabel(self.login_frame, text="",
-                                         fg_color="transparent")
+                                               fg_color="transparent")
         self.verification_label.grid(row=6, column=0, padx=12, sticky="ew")
-
 
     def login(self, controller, storage_class):
         """
@@ -118,7 +117,7 @@ class Login(ctk.CTkFrame):
         try:
             if not username or not password:
                 self.verification_label.configure(text="Please enter username and password",
-                                            fg_color="red")
+                                                  fg_color="red")
                 return
 
             with DataBase() as db: 
@@ -143,7 +142,8 @@ class Login(ctk.CTkFrame):
             self.verification_label.configure(text="An error occurred during registration.", fg_color="red")
             logger.error(f"An error occurred while setting up the database: {e}")
 
-    def save_credentials(self, username, password):
+    @staticmethod
+    def save_credentials(username, password):
         """
         Saves the user's credentials (username and password) in a JSON file.
         Encrypts the password using they key from the database or generates
@@ -156,17 +156,10 @@ class Login(ctk.CTkFrame):
         with DataBase() as db:
             encryption_key = db.login_retrieve_encryption_key(username)
 
-        if not encryption_key:
-            encryption_key = Fernet.generate_key()
+        encryption_manager = EncryptionManager(encryption_key)
+        iv, encrypted_password = encryption_manager.encrypt(password)
 
-            with DataBase() as db:
-                db.login_save_encryption_key(encryption_key, username)
-
-        fernet = Fernet(encryption_key)
-        encrypted_password = fernet.encrypt(password.encode("utf-8")).decode("utf-8")
-
-
-        credentials = {"username": username, "password": encrypted_password}
+        credentials = {"username": username, "password": encrypted_password, "iv": iv}
         
         const.CREDENTIALS_FOLDER.mkdir(exist_ok=True)
         with open(const.CREDENTIALS_PATH, "w", encoding="utf-8") as f:
@@ -179,29 +172,29 @@ class Login(ctk.CTkFrame):
         Also sets the "Remember Me" checkbox if credentials are loaded successfully.
         """
 
-
         try:
-
             with open(const.CREDENTIALS_PATH, "r", encoding="utf-8") as f:
                 credentials = json.load(f)
-                username, encrypted_password = (credentials.get("username", ""),
-                                                credentials.get("password", ""))
+                username = credentials.get("username", "")
+                encrypted_password = credentials.get("password", "")
+                iv = credentials.get("iv", "")
 
                 with DataBase() as db:
                     encryption_key = db.login_retrieve_encryption_key(username)
 
-                fernet = Fernet(encryption_key)
-                password = fernet.decrypt(encrypted_password.encode("utf-8")).decode("utf-8")
+                    encryption_manager = EncryptionManager(encryption_key)
+                    decrypted_password = encryption_manager.decrypt(iv, encrypted_password)
 
                 self.username_entry.insert(ctk.END, username)
-                self.password_entry.insert(ctk.END, password)
+                self.password_entry.insert(ctk.END, decrypted_password)
 
                 self.checkbox_var.set(True)
 
         except FileNotFoundError:
             self.checkbox_var.set(False)
 
-    def delete_credentials(self):
+    @staticmethod
+    def delete_credentials():
         """
         Deletes the stored credentials file if it exists.
         """

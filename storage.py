@@ -36,10 +36,12 @@ import webbrowser
 import constants as const
 import logging
 from database import DataBase
+from encryption import EncryptionManager
 
 logging.basicConfig(level=logging.DEBUG, filename=const.LOGGING_PATH,
                     format="%(asctime)s -  %(levelname)s - Module: %(module)s - %(message)s")
 logger = logging.getLogger(__name__)
+
 
 class Storage(ctk.CTkFrame):
     """
@@ -91,7 +93,6 @@ class Storage(ctk.CTkFrame):
         """
         ctk.CTkFrame.__init__(self, parent)
 
-
         sidebar = SideBarFrame(self, controller)
         sidebar.grid(row=0, column=0, rowspan=4, sticky="ns")
         sidebar.label("Storage Module")
@@ -99,19 +100,18 @@ class Storage(ctk.CTkFrame):
         self.user_id = user_id
         self.db_path = const.DATABASE_PATH
 
-
         self.new_item = ctk.CTkButton(sidebar.frame, text="New Entry",
-                                       command=self.open_entry_frame)
+                                      command=self.open_entry_frame)
         self.new_item.grid(row=2, column=0, padx=20, pady=10)
         self.entry_window = None
 
         self.pw_generator = ctk.CTkButton(sidebar.frame, text="Pass Generator",
-                                           command=self.open_toplevel)
+                                          command=self.open_toplevel)
         self.pw_generator.grid(row=3, column=0, padx=20, pady=10)
         self.toplevel_window = None
 
         self.log_out = ctk.CTkButton(sidebar.frame, text="Log Out",
-                                        command=lambda: self.log_out_button_press(controller))
+                                     command=lambda: self.log_out_button_press(controller))
         self.log_out.grid(row=5, column=0, padx=20, pady=10)
 
         self.scrollable_frame = ctk.CTkScrollableFrame(self, label_text="Accounts")
@@ -127,7 +127,6 @@ class Storage(ctk.CTkFrame):
         """
         self.destroy_entry_widgets()
         controller.show_frame("Login")
-        
 
     def open_toplevel(self):
         """
@@ -157,7 +156,6 @@ class Storage(ctk.CTkFrame):
         with DataBase() as db:
             account_names = db.storage_create_account_buttons(self.user_id)
 
-
         self.destroy_account_buttons()
 
         for i, account_name in enumerate(account_names):
@@ -167,7 +165,7 @@ class Storage(ctk.CTkFrame):
 
             # When the button is clicked, create entry widgets
             button.bind("<Button-1>", lambda event, account_name=account_name[0]:
-                                                self.create_entry_widgets(account_name))
+                        self.create_entry_widgets(account_name))
 
     def create_entry_widgets(self, account_name):
         """
@@ -181,6 +179,14 @@ class Storage(ctk.CTkFrame):
         # Fetch account details based on the provided account_name
         with DataBase() as db:
             account_details = db.storage_fetch_user_data(account_name, self.user_id)
+            encryption_key_tuple = db.storage_retrieve_encryption_key(self.user_id)
+
+            encrypted_password = account_details[3]
+            iv = account_details[5]
+            encryption_key = encryption_key_tuple[0]
+            encryption_manager = EncryptionManager(encryption_key)
+            password = encryption_manager.decrypt(iv, encrypted_password)
+
 
 
         if account_details:
@@ -196,31 +202,30 @@ class Storage(ctk.CTkFrame):
 
             self.password_entry = ctk.CTkEntry(self.details_frame, show="*")
             self.password_entry.grid(row=2, column=1, padx=10, pady=10, sticky="e")
-            self.password_entry.insert(0, account_details[3])
+            self.password_entry.insert(0, password)
 
             self.website_entry = ctk.CTkEntry(self.details_frame)
             self.website_entry.grid(row=3, column=1, padx=10, pady=10, sticky="e")
             self.website_entry.insert(0, account_details[4])
 
             self.save_button = ctk.CTkButton(self.details_frame, text="Save",
-                                            command=self.update_details)
+                                             command=self.update_details)
             self.save_button.grid(row=4, column=0, columnspan=2, pady=10)
 
             self.delete_button = ctk.CTkButton(self.details_frame, text="Delete",
-                                            command=self.delete_details)
+                                               command=self.delete_details)
             self.delete_button.grid(row=6, column=0, columnspan=2, pady=10)
 
-
             self.copy_username_button = ctk.CTkButton(self.details_frame, text="Copy Username",
-                                                    command=self.copy_username)
+                                                      command=self.copy_username)
             self.copy_username_button.grid(row=1, column=2, padx=10, pady=10)
 
             self.copy_password_button = ctk.CTkButton(self.details_frame, text="Copy Password",
-                                                    command=self.copy_password)
+                                                      command=self.copy_password)
             self.copy_password_button.grid(row=2, column=2, padx=10, pady=10)
 
             self.open_website_button = ctk.CTkButton(self.details_frame, text="Open Website",
-                                                    command=self.open_website)
+                                                     command=self.open_website)
             self.open_website_button.grid(row=3, column=2, padx=10, pady=10)
 
             self.details_frame.grid_propagate(False)
@@ -283,15 +288,17 @@ class Storage(ctk.CTkFrame):
         """
 
         if account_index is not None:
-
             with DataBase() as db:
                 account_details = db.storage_fetch_details(account_index)
-                print(f"Fetched details from database - {account_details}")
+                encryption_key_tuple = db.storage_retrieve_encryption_key(self.user_id)
 
             if account_details:
                 self.create_entry_fields_and_buttons()
 
-                name, username, password, website = account_details
+                name, username, encrypted_password, website, iv = account_details
+                encryption_key = encryption_key_tuple[0]
+                encryption_manager = EncryptionManager(encryption_key)
+                password = encryption_manager.decrypt(iv, encrypted_password)
 
                 # Update the entry widgets with fetched details
                 self.entry_widgets["name"].delete(0, "end")
@@ -308,8 +315,6 @@ class Storage(ctk.CTkFrame):
             else:
                 logger.error("No account details found for the selected account index")
 
-
-
     def update_details(self):
         """
         Updates user account details in the database.
@@ -320,19 +325,20 @@ class Storage(ctk.CTkFrame):
         website = self.website_entry.get()
 
         if self.current_id is not None:
-
-            data = (name, username, password, website, self.current_id)
-
             with DataBase() as db:
+                encryption_key_tuple = db.storage_retrieve_encryption_key(self.user_id)
+                encryption_key = encryption_key_tuple[0]
+                encryption_manager = EncryptionManager(encryption_key)
+                iv, encrypted_password = encryption_manager.encrypt(password)
+
+                data = (name, username, encrypted_password, website, iv, self.current_id)
                 db.storage_update_user_data(data)
                 logger.info("Details updated successfully to the db.")
-
 
             self.create_account_buttons()
 
         else:
             logger.error("Record not found for the given ID.")
-
 
     def delete_details(self):
 
@@ -341,7 +347,6 @@ class Storage(ctk.CTkFrame):
                 db.storage_delete_details(self.current_id)
             self.create_account_buttons()
             self.destroy_entry_widgets()
-
 
     def copy_username(self):
         """

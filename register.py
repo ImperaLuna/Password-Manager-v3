@@ -16,6 +16,7 @@ import logging
 import constants as const
 from sidebar import SideBarFrame
 from database import DataBase
+import secrets
 
 
 logging.basicConfig(level=logging.INFO, filename=const.LOGGING_PATH,
@@ -88,7 +89,6 @@ class Register(ctk.CTkFrame):
         self.verification_label = ctk.CTkLabel(self.register_form_frame, text="", fg_color="transparent")
         self.verification_label.grid(row=5, column=0, padx=80, sticky="ew")
 
-
     def button_register_event(self):
         """
         Handles the registration process when the "Register" button is clicked.
@@ -104,6 +104,7 @@ class Register(ctk.CTkFrame):
         Note:
             - This method assumes the existence of the "Users" table in the database.
             - Passwords are hashed using bcrypt before being stored in the database.
+            - This methode assigns the user an encryption key to the password
         """
         username = self.username.get()
         password = self.password.get()
@@ -124,8 +125,9 @@ class Register(ctk.CTkFrame):
                 else:
                     encoded_password = password.encode("utf-8")
                     hashed_password = bcrypt.hashpw(encoded_password, bcrypt.gensalt())
-                    
-                    db.register_user(username, hashed_password)
+                    encryption_key = secrets.token_bytes(32)
+
+                    db.register_user(username, hashed_password, encryption_key)
                     
                     self.verification_label.configure(text="Account has been created", fg_color="green")
                     logger.info(f"A new user: {username} has signed up.")
@@ -134,7 +136,6 @@ class Register(ctk.CTkFrame):
             self.verification_label.configure(text="An error occurred during registration.", fg_color="red")
             logger.error(f"An error occurred while setting up the database: {e}")
 
-            
     def reveal_password(self):
         """
         Toggles the visibility of password entries based on the state of a checkbox.
@@ -143,7 +144,7 @@ class Register(ctk.CTkFrame):
         - If the checkbox is unchecked ("off"), the password entries are displayed as * for security
 
         Note:
-            - This method is bound to a checkbox's command to dynamically update password visibility
+            - This method bounds to a checkboxes command to dynamically update password visibility
         """
         show_text = self.checkbox_var.get() == "on"
         if show_text:
