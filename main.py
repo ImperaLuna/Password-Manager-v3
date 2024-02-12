@@ -24,6 +24,7 @@ import constants as const
 ctk.set_appearance_mode("system")
 ctk.set_default_color_theme("blue")
 
+
 class MainApp(ctk.CTk):
     """
     Main application class for the Password Manager.
@@ -70,7 +71,6 @@ class MainApp(ctk.CTk):
             frame = window_class(container, self, user_id)
             self.frames[window_name] = frame
             frame.grid(row=0, column=0, sticky="nsew")
-
 
         self.show_frame("Login")
 

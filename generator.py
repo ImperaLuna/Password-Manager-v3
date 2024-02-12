@@ -16,6 +16,7 @@ import string
 import pyperclip
 from database import DataBase 
 
+
 class Generator(ctk.CTkToplevel):
     """
     Initialize the Password Generator GUI.

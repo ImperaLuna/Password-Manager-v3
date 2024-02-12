@@ -28,6 +28,7 @@ logging.basicConfig(level=logging.INFO, filename=const.LOGGING_PATH,
                     format="%(asctime)s -  %(levelname)s - Module: %(module)s - %(message)s")
 logger = logging.getLogger(__name__)
 
+
 class DataBase:
     """
     A class representing a SQLite database.

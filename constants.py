@@ -17,7 +17,7 @@ DATABASE_PATH = DATABASE_FOLDER / DATABASE_NAME
 # ================================
 #   Logging Variables
 # ================================
-LOGGING_PATH = ROOT / "logs" / "log.log"
+LOGGING_PATH = ROOT / "log.log"
 
 # ================================
 #   Window Settings
