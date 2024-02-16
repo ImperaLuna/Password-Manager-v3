@@ -174,8 +174,8 @@ class DataBase:
         """
         cursor = self.connection.cursor()
         query = """
-            INSERT INTO UserData (entry_name, entry_username, entry_password, entry_website, User_id)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO UserData (entry_name, entry_username, entry_password, entry_website, iv, User_id)
+            VALUES (?, ?, ?, ?, ?, ?)
         """
         cursor.execute(query, values)
 

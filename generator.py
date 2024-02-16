@@ -15,6 +15,7 @@ import random
 import string
 import pyperclip
 from database import DataBase 
+from encryption import EncryptionManager
 
 
 class Generator(ctk.CTkToplevel):
@@ -237,16 +238,22 @@ class EntryFrame(ctk.CTkToplevel):
         - refresh_callback: Callback function to refresh the display.
         """
 
-        values = (
-            self.name_entry.get(),
-            self.username_entry.get(),
-            self.password_entry.get(),
-            self.website_entry.get(),
-            self.user_id
-        )
+        if self.user_id is not None:
+            with DataBase() as db:
+                encryption_key_tuple = db.storage_retrieve_encryption_key(self.user_id)
+                encryption_key = encryption_key_tuple[0]
+                encryption_manager = EncryptionManager(encryption_key)
+                iv, encrypted_password = encryption_manager.encrypt(self.password_entry.get())
 
-        with DataBase() as db:
-            db.generator_save_user_data(values)
+                values = (
+                    self.name_entry.get(),
+                    self.username_entry.get(),
+                    encrypted_password,
+                    self.website_entry.get(),
+                    iv,
+                    self.user_id
+                )
+                db.generator_save_user_data(values)
 
         #calling create_account_buttons() from storage module to refresh the buttons
         refresh_callback()

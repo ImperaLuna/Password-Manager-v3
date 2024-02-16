@@ -22,7 +22,7 @@ from database import DataBase
 import constants as const
 
 ctk.set_appearance_mode("system")
-ctk.set_default_color_theme("blue")
+ctk.set_default_color_theme("dark-blue")
 
 
 class MainApp(ctk.CTk):

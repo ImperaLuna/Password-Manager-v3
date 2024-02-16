@@ -177,6 +177,7 @@ class Login(ctk.CTkFrame):
                 credentials = json.load(f)
                 username = credentials.get("username", "")
                 encrypted_password = credentials.get("password", "")
+                # iv = initialization vector.
                 iv = credentials.get("iv", "")
 
                 with DataBase() as db:
